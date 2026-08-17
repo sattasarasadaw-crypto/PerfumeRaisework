@@ -89,10 +89,25 @@ header { display: flex; justify-content: space-between; align-items: flex-end;
 .card h2 { font-size: var(--text-h2); font-family: var(--font-display); margin-bottom: var(--space-1); }
 .card .sub { font-size: var(--text-small); color: var(--color-ink-muted); margin-bottom: var(--space-4); }
 
+/* ---------- Product concentration ---------- */
+.prod { background: var(--color-bg); border-radius: var(--radius-sm); padding: var(--space-3);
+        margin-bottom: var(--space-4); }
+.prod .plbl { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--color-ink-muted); }
+.pbtns { display: flex; gap: var(--space-2); margin: var(--space-2) 0; }
+.pbtns button { flex: 1; padding: var(--space-2); border: 1px solid var(--color-divider);
+  background: var(--color-surface); color: var(--color-ink-muted); border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 12px; cursor: pointer;
+  transition: all var(--motion-fast) var(--ease); }
+.pbtns button:hover { border-color: var(--color-accent); }
+.pbtns button.on { background: var(--color-accent); border-color: var(--color-accent); color: #fff; font-weight: 600; }
+.prod .pnote { font-size: 11.5px; color: var(--color-ink-muted); }
+
 /* ---------- Formula panel ---------- */
-.rows { border-top: 1px solid var(--color-divider); }
-.row { display: grid; grid-template-columns: 1fr 74px; gap: var(--space-3);
+.rows { border-top: 1px solid var(--color-divider); max-height: 480px; overflow-y: auto; }
+.row { display: grid; grid-template-columns: 1fr 70px; gap: var(--space-3);
        align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); }
+.row .cap { font-family: var(--font-mono); font-size: 10.5px; color: var(--color-support); }
+.row .cap.tight { color: var(--color-warn); font-weight: 600; }
 .row .nm { font-size: var(--text-small); line-height: 1.35; }
 .row .nm b { display: block; font-weight: 600; font-size: 14px; }
 .row .nm span { color: var(--color-ink-muted); font-family: var(--font-mono); font-size: 11.5px; }
@@ -274,8 +289,19 @@ button.calc:disabled { background: var(--color-divider); color: var(--color-ink-
     <!-- ============ ซ้าย: ป้อนสูตร (FR-01, FR-02, FR-03) ============ -->
     <div>
       <div class="card">
-        <h2>สูตรน้ำหอม</h2>
+        <h2>สูตร EDP-001 “Amber Sage”</h2>
         <p class="sub">FR-01 · FR-02 · FR-03 — แก้ % แล้วระบบตรวจให้ทันที</p>
+
+        <div class="prod">
+          <span class="plbl">ความเข้มข้นของผลิตภัณฑ์</span>
+          <div class="pbtns">
+            <button data-p="edt">EDT 12%</button>
+            <button data-p="edp" class="on">EDP 20%</button>
+            <button data-p="parfum">Parfum 30%</button>
+          </div>
+          <span class="pnote">เพดาน IFRA คิดจาก <b>%ในขวด</b> = %สูตร × ความเข้มข้น</span>
+        </div>
+
         <div class="rows" id="rows"></div>
 
         <div class="total">
@@ -362,8 +388,8 @@ button.calc:disabled { background: var(--color-divider); color: var(--color-ink-
 
         <!-- ODT filtered (FR-16, FR-17, NFR-08) -->
         <div class="card">
-          <h2>สารที่ถูกตัดจากบรีฟ</h2>
-          <p class="sub">FR-16 · FR-17 — ความเข้มข้นที่ระเหยจริงต่ำกว่าเกณฑ์ที่จมูกมนุษย์รับรู้ได้ (ODT)</p>
+          <h2>เกณฑ์การรับรู้กลิ่น (ODT)</h2>
+          <p class="sub">FR-16 · FR-17 — สารที่ความเข้มข้นต่ำกว่าเกณฑ์ที่จมูกมนุษย์รับรู้ได้ จะถูกตัดออกจากบรีฟ</p>
           <div class="odt" id="odt"></div>
           <div class="note">
             ℹ️ สารเหล่านี้ <b>ยังถูกนับในการคำนวณ IFRA และต้นทุน</b> — ถูกตัดเฉพาะจากคำบรรยายกลิ่นเท่านั้น
@@ -412,21 +438,47 @@ button.calc:disabled { background: var(--color-divider); color: var(--color-ink-
    ตัวเลขเป็นค่าสมมติสำหรับสาธิต UI เท่านั้น ไม่ใช่ค่าเคมีจริง
    ============================================================ */
 
+/* สูตรตัวอย่าง EDP-001 "Amber Sage" — 26 สาร
+   ชื่อสาร / CAS / เพดาน IFRA Cat 4 = ข้อมูลจริงจากคลังวัตถุดิบและ IFRA 51st Amendment
+   cluster / odt / pot / tier      = ค่าสมมติเพื่อสาธิต UI (รอ Rule Sheet)
+   cap = null  หมายถึงไม่มีเพดานตัวเลขตาม IFRA Cat 4
+   รายละเอียด: ดู sample-formula.md                                              */
 const MATERIALS = [
-  // code   ชื่อ                      cluster                 layer   pct   ifraCap  odt   ppmK  ราคา/กก.
-  { c:'RM-004', n:'Bergamot Oil',        g:'Citrus Bright',     l:'top',   p:18.0, cap:20.0, odt:0.8, k:0.30, pr:3200 },
-  { c:'RM-011', n:'Linalool',            g:'Floral Fresh',      l:'top',   p: 8.5, cap:12.0, odt:0.5, k:0.28, pr:1400 },
-  { c:'RM-014', n:'Citral',              g:'Citrus Bright',     l:'top',   p: 2.4, cap: 3.0, odt:0.4, k:0.26, pr:1900 },
-  { c:'RM-023', n:'Rose Absolute',       g:'Rose Attar',        l:'heart', p:12.0, cap:18.0, odt:0.6, k:0.16, pr:48000 },
-  { c:'RM-031', n:'Jasmine Sambac Abs.', g:'White Floral',      l:'heart', p: 7.4, cap:10.0, odt:0.5, k:0.15, pr:52000 },
-  { c:'RM-038', n:'Clary Sage Oil',      g:'Herbal Green',      l:'heart', p: 6.0, cap: 9.0, odt:0.7, k:0.18, pr:6800 },
-  { c:'RM-046', n:'Iso E Super',         g:'Woody Amber',       l:'base',  p:26.07,cap:30.0, odt:0.3, k:0.09, pr:2100 },
-  { c:'RM-052', n:'Cedarwood Virginia',  g:'Woody Amber',       l:'base',  p:10.5, cap:15.0, odt:0.4, k:0.08, pr:1700 },
-  { c:'RM-060', n:'Ambroxan',            g:'Amber Musk',        l:'base',  p: 9.0, cap:12.0, odt:0.2, k:0.07, pr:9400 },
-  { c:'RM-077', n:'Gamma-Decalactone',   g:'Creamy Lactonic',   l:'heart', p: 0.06,cap: 2.0, odt:0.4, k:0.14, pr:5600 },
-  { c:'RM-081', n:'Ethyl Maltol',        g:'Sweet Gourmand',    l:'base',  p: 0.04,cap: 1.5, odt:0.3, k:0.10, pr:2400 },
-  { c:'RM-092', n:'Trace Aldehyde C-12', g:'Aldehydic',         l:'top',   p: 0.03,cap: 1.0, odt:0.5, k:0.32, pr:3100 },
+  // CAS          ชื่อ                        cluster              layer   %สูตร  IFRA  odt     pot  tier
+  { c:'5989-27-5',   n:'Limonene (D-limonene)',   g:'Citrus Terpene',    l:'top',   p: 5.70, cap:null,  odt:0.9,    pot:1.0, tier:1 },
+  { c:'78-70-6',     n:'Linalool',                g:'Linalool Fresh',    l:'top',   p: 6.00, cap:null,  odt:0.6,    pot:1.1, tier:1 },
+  { c:'18479-58-8',  n:'Dihydromyrcenol',         g:'Citrus Terpene',    l:'top',   p: 5.00, cap:null,  odt:0.5,    pot:1.2, tier:1 },
+  { c:'115-95-7',    n:'Linalyl Acetate',         g:'Linalool Fresh',    l:'top',   p: 4.00, cap:null,  odt:0.5,    pot:1.1, tier:1 },
+  { c:'5392-40-5',   n:'Citral',                  g:'Citrus Aldehydic',  l:'top',   p: 2.80, cap:0.6,   odt:0.25,   pot:1.6, tier:3 },
+  { c:'928-96-1',    n:'Cis-3-Hexenol',           g:'Green Leaf',        l:'top',   p: 0.30, cap:null,  odt:0.05,   pot:3.0, tier:1 },
+  { c:'112-31-2',    n:'Aldehyde C-10 (Decanal)', g:'Citrus Aldehydic',  l:'top',   p: 0.20, cap:null,  odt:0.02,   pot:5.0, tier:1 },
+
+  { c:'24851-98-7',  n:'Hedione (Me Dihydrojas.)',g:'Jasmine Airy',      l:'heart', p:12.00, cap:null,  odt:0.6,    pot:0.8, tier:2 },
+  { c:'60-12-8',     n:'Phenethyl Alcohol',       g:'Rosy Alcohol',      l:'heart', p: 6.00, cap:null,  odt:0.5,    pot:0.9, tier:3 },
+  { c:'106-22-9',    n:'Citronellol',             g:'Rosy Alcohol',      l:'heart', p: 4.00, cap:12,    odt:0.35,   pot:1.0, tier:1 },
+  { c:'106-24-1',    n:'Geraniol',                g:'Rosy Alcohol',      l:'heart', p: 3.00, cap:4.7,   odt:0.3,    pot:1.0, tier:3 },
+  { c:'127-42-4',    n:'Alpha-methyl Ionone',     g:'Ionone Powdery',    l:'heart', p: 3.00, cap:30,    odt:0.15,   pot:1.4, tier:1 },
+  { c:'6259-76-3',   n:'Hexyl Salicylate',        g:'Salicylate Floral', l:'heart', p: 1.00, cap:6.5,   odt:0.1,    pot:1.0, tier:4 },
+  { c:'16409-43-1',  n:'Rose Oxide',              g:'Rose Ketone',       l:'heart', p: 0.15, cap:null,  odt:0.006,  pot:6.0, tier:3 },
+  { c:'120-72-9',    n:'Indole',                  g:'Indolic Animalic',  l:'heart', p: 0.03, cap:null,  odt:0.003,  pot:9.0, tier:1 },
+  { c:'23696-85-7',  n:'Damascenone Total',       g:'Rose Ketone',       l:'heart', p: 0.02, cap:0.043, odt:0.0008, pot:30.0,tier:4 },
+
+  { c:'54464-57-2',  n:'Iso E Super (Anthamber)', g:'Woody Amber',       l:'base',  p:18.00, cap:20,    odt:0.8,    pot:0.5, tier:2 },
+  { c:'111879-80-2', n:'Habanolide',              g:'Macrocyclic Musk',  l:'base',  p: 8.00, cap:null,  odt:0.35,   pot:0.5, tier:1 },
+  { c:'1222-05-5',   n:'Galaxolide (HHCB)',       g:'Polycyclic Musk',   l:'base',  p: 7.00, cap:null,  odt:0.3,    pot:0.5, tier:2 },
+  { c:'19870-74-7',  n:'Cedramber',               g:'Woody Amber',       l:'base',  p: 4.00, cap:null,  odt:0.25,   pot:0.6, tier:1 },
+  { c:'105-95-3',    n:'Ethylene Brassylate',     g:'Macrocyclic Musk',  l:'base',  p: 4.00, cap:null,  odt:0.25,   pot:0.5, tier:2 },
+  { c:'6790-58-5',   n:'Ambroxan',                g:'Ambergris',         l:'base',  p: 3.00, cap:null,  odt:0.1,    pot:0.9, tier:2 },
+  { c:'91-64-5',     n:'Coumarin',                g:'Coumarinic Sweet',  l:'base',  p: 1.20, cap:1.5,   odt:0.06,   pot:1.0, tier:3 },
+  { c:'70788-30-6',  n:'Timberol',                g:'Sandalwood Dry',    l:'base',  p: 1.00, cap:1.3,   odt:0.05,   pot:1.0, tier:3 },
+  { c:'121-33-5',    n:'Vanillin',                g:'Coumarinic Sweet',  l:'base',  p: 0.50, cap:null,  odt:0.02,   pot:1.2, tier:1 },
+  { c:'4707-47-5',   n:'Evernyl (Veramoss)',      g:'Mossy',             l:'base',  p: 0.10, cap:null,  odt:0.014,  pot:1.0, tier:3 },
 ];
+
+/* ความเข้มข้นของผลิตภัณฑ์ — เพดาน IFRA คิดจากผลิตภัณฑ์สำเร็จรูป ไม่ใช่หัวน้ำหอมเข้มข้น */
+const PRODUCTS = { edt:{lbl:'EDT 12%', v:0.12}, edp:{lbl:'EDP 20%', v:0.20}, parfum:{lbl:'Parfum 30%', v:0.30} };
+let PROD = 'edp';
+const conc = () => PRODUCTS[PROD].v;
 
 const rowsEl=document.getElementById('rows'), totalEl=document.getElementById('total'),
       hintEl=document.getElementById('hint'), btnCalc=document.getElementById('btnCalc'),
@@ -437,8 +489,9 @@ let calculated=false, tone='chem';
 MATERIALS.forEach((m,i)=>{
   const r=document.createElement('div');
   r.className='row'; r.id='row'+i;
-  r.innerHTML=`<div class="nm"><b>${m.n}</b><span>${m.c} · ${m.g}</span></div>
-               <input type="number" step="0.1" min="0" value="${m.p.toFixed(2)}" data-i="${i}">`;
+  r.innerHTML=`<div class="nm"><b>${m.n}</b><span>CAS ${m.c} · ${m.g}</span>
+                 <span class="cap" id="cap${i}"></span></div>
+               <input type="number" step="0.01" min="0" value="${m.p.toFixed(2)}" data-i="${i}">`;
   rowsEl.appendChild(r);
 });
 
@@ -466,9 +519,28 @@ function checkTotal(){
     hintEl.textContent = d<0 ? `ขาดอีก ${Math.abs(d).toFixed(2)}%` : `เกินมา ${d.toFixed(2)}%`;
     btnCalc.disabled=true;
   }
-  MATERIALS.forEach((m,i)=>
-    document.getElementById('row'+i).classList.toggle('over', m.p>m.cap));
+  // FR-22: แสดงเพดาน IFRA ต่อสาร (คิดจาก %ในขวด) และไฮไลต์สารที่เกิน
+  MATERIALS.forEach((m,i)=>{
+    const fin=m.p*conc(), over=(m.cap!==null && fin>m.cap);
+    document.getElementById('row'+i).classList.toggle('over', over);
+    const el=document.getElementById('cap'+i);
+    if(m.cap===null){ el.className='cap'; el.textContent=`ในขวด ${fin.toFixed(3)}% · IFRA ไม่จำกัด`; }
+    else {
+      const u=fin/m.cap*100;
+      el.className='cap'+(u>85?' tight':'');
+      el.textContent=`ในขวด ${fin.toFixed(3)}% / เพดาน ${m.cap}% · ใช้ไป ${u.toFixed(0)}%`;
+    }
+  });
 }
+
+/* ---------- สลับความเข้มข้นของผลิตภัณฑ์ (FR-21) ---------- */
+document.querySelectorAll('.pbtns button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.pbtns button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); PROD=b.dataset.p;
+    checkTotal(); if(calculated) render();
+  };
+});
 
 btnCalc.addEventListener('click', ()=>{
   calculated=true; empty.style.display='none'; dash.classList.add('on'); render();
@@ -478,8 +550,13 @@ btnCalc.addEventListener('click', ()=>{
 function engineA(){
   const active=MATERIALS.filter(m=>m.p>0);
 
-  // FR-16: ppm ที่ระเหยจริง → เทียบ ODT
-  active.forEach(m=>{ m.ppm=+(m.p*m.k).toFixed(3); m.audible = m.ppm >= m.odt; });
+  // FR-16: ความเข้มข้นที่รับรู้ได้จริง → เทียบ ODT (คิดจาก %ในขวด)
+  active.forEach(m=>{
+    m.fin=+(m.p*conc()).toFixed(4);
+    m.ppm=+(m.fin*m.pot).toFixed(4);
+    m.ratio=m.ppm/m.odt;
+    m.audible = m.ppm >= m.odt;
+  });
 
   // FR-08: น้ำหนักรายกลุ่ม (นับเฉพาะสารที่จมูกรับรู้ได้ → FR-17)
   const groups={};
@@ -499,8 +576,9 @@ function engineA(){
   const lo=+(3.0+baseShare*11).toFixed(1), hi=+(lo+1.6).toFixed(1);
   const sillage = topShare>0.30 ? 'good' : topShare>0.18 ? 'moderate' : 'intimate';
 
-  // FR-21: IFRA
-  const viol=active.filter(m=>m.p>m.cap).map(m=>({...m, over:+(m.p-m.cap).toFixed(2)}));
+  // FR-21: IFRA — เทียบ %ในขวด กับเพดาน Category 4 (ข้ามสารที่ไม่มีเพดานตัวเลข)
+  const capped=active.filter(m=>m.cap!==null);
+  const viol=capped.filter(m=>m.fin>m.cap).map(m=>({...m, over:+(m.fin-m.cap).toFixed(3)}));
 
   // FR-23 / BR-04: Muddy Accord
   const pcts=clusters.map(c=>c.pct);
@@ -513,11 +591,12 @@ function engineA(){
     const e=Object.entries(s).sort((a,b)=>b[1]-a[1]);
     return e.length? {g:e[0][0], pct:+(e[0][1]/lt*100).toFixed(1)} : {g:'—', pct:0}; };
 
-  return { active, clusters, viol, muddy, risk:Math.min(100,Math.max(0,risk)),
+  return { active, clusters, viol, capped, muddy, risk:Math.min(100,Math.max(0,risk)),
            lo, hi, sillage, tp:+(tp/lt*100).toFixed(1), hp:+(hp/lt*100).toFixed(1), bp:+(bp/lt*100).toFixed(1),
            pTop:topGroup('top'), pHeart:topGroup('heart'), pBase:topGroup('base'),
            filtered: active.filter(m=>!m.audible),
-           cost: Math.round(active.reduce((a,m)=>a+m.p/100*m.pr,0)) };
+           nearOdt: active.filter(m=>m.audible).slice().sort((a,b)=>a.ratio-b.ratio).slice(0,3),
+           costIdx: +active.reduce((a,m)=>a+m.p*m.tier,0).toFixed(0) };
 }
 
 /* ---------- Engine B (แปลผลเป็นภาษา — ห้ามสร้างตัวเลขเอง / FR-19, BR-05) ---------- */
@@ -548,18 +627,21 @@ function render(){
 
   // Alerts — FR-22 / FR-23
   const A=document.getElementById('alerts'); A.innerHTML='';
+  const P=PRODUCTS[PROD].lbl;
   if(R.viol.length){
     A.innerHTML += `<div class="alert warn">
       <span class="ic">IFRA FAIL</span>
-      <div class="bd"><b>เกินเพดาน IFRA 51st Amendment</b>
-        <span>${R.viol.map(v=>`<code>${v.c} ${v.n}</code> เกินมา ${v.over}% (เพดาน ${v.cap}%)`).join(' · ')}</span>
+      <div class="bd"><b>เกินเพดาน IFRA 51st Amendment (Category 4) ที่ความเข้มข้น ${P}</b>
+        <span>${R.viol.map(v=>`<code>${v.n}</code> ในขวด ${v.fin.toFixed(3)}% — เกินเพดาน ${v.cap}% อยู่ <b>${v.over}%</b>`).join(' · ')}</span>
       </div></div>`;
   }else{
-    const near=R.active.reduce((a,m)=>(m.cap-m.p)<(a.cap-a.p)?m:a);
+    const near=R.capped.reduce((a,m)=>(m.fin/m.cap)>(a.fin/a.cap)?m:a);
     A.innerHTML += `<div class="alert pass">
       <span class="ic">IFRA PASS</span>
-      <div class="bd"><b>ผ่านเกณฑ์ IFRA 51st Amendment ทุกสาร</b>
-        <span>สารที่ใกล้เพดานที่สุดคือ <code>${near.n}</code> — ยังเหลือระยะห่างอีก ${(near.cap-near.p).toFixed(2)}%</span>
+      <div class="bd"><b>ผ่านเกณฑ์ IFRA 51st Amendment (Category 4) ที่ความเข้มข้น ${P}</b>
+        <span>ตรวจสารที่มีเพดาน ${R.capped.length} ตัว — ตึงที่สุดคือ <code>${near.n}</code>
+        ในขวด ${near.fin.toFixed(3)}% / เพดาน ${near.cap}% (ใช้ไป ${(near.fin/near.cap*100).toFixed(0)}%)
+        เหลือระยะห่าง ${(near.cap-near.fin).toFixed(3)}%</span>
       </div></div>`;
   }
   A.innerHTML += R.muddy
@@ -586,9 +668,13 @@ function render(){
   const O=document.getElementById('odt');
   O.innerHTML = R.filtered.length
     ? R.filtered.map(m=>`<div class="it">
-        <div><b>${m.n}</b> <span style="color:var(--color-ink-muted)">${m.c}</span></div>
-        <div class="num">${m.ppm} ppm &lt; ODT ${m.odt} ppm</div></div>`).join('')
-    : `<div class="it"><div>ไม่มีสารที่ถูกตัด — ทุกสารอยู่เหนือเกณฑ์ ODT</div></div>`;
+        <div><b>${m.n}</b> <span style="color:var(--color-ink-muted)">CAS ${m.c}</span></div>
+        <div class="num" style="color:var(--color-warn)">${m.ppm} &lt; ODT ${m.odt} → ถูกตัด</div></div>`).join('')
+    : `<div class="it"><div><b>✓ ไม่มีสารที่ถูกตัด</b> — ทุกสารอยู่เหนือเกณฑ์การรับรู้ของจมูก</div></div>`
+      + `<div style="margin-top:12px;font-size:12px;color:var(--color-ink-muted)">3 สารที่ใกล้เกณฑ์ ODT ที่สุด — ถ้าลดลงอีกจะเริ่มไม่ได้กลิ่น</div>`
+      + R.nearOdt.map(m=>`<div class="it">
+          <div>${m.n} <span style="color:var(--color-ink-muted)">CAS ${m.c}</span></div>
+          <div class="num">${m.ppm} / ODT ${m.odt} · <b>${m.ratio.toFixed(2)}×</b></div></div>`).join('');
 
   // Export — BR-02
   const ex=document.getElementById('btnExport'), rs=document.getElementById('exportRsn');
@@ -652,17 +738,21 @@ function cmd(q){
   if(!R){ out.className='cmdout on'; out.innerHTML='ยังไม่มีผลการคำนวณ — กดปุ่ม “คำนวณสูตร” ก่อน'; return; }
   let h='';
   if(q==='cost'){
-    h=`<b>ต้นทุนวัตถุดิบ ≈ ${R.cost.toLocaleString()} บาท/กก.</b><table>`+
-      R.active.slice().sort((a,b)=>(b.p*b.pr)-(a.p*a.pr)).slice(0,5)
-       .map(m=>`<tr><td>${m.n}</td><td>${Math.round(m.p/100*m.pr).toLocaleString()} ฿</td></tr>`).join('')+'</table>';
+    const tot=R.active.reduce((a,m)=>a+m.p*m.tier,0);
+    h=`<b>สัดส่วนต้นทุนวัตถุดิบ (ดัชนีสัมพัทธ์)</b>
+       <div style="opacity:.6;margin:4px 0 8px">ราคาจริงต่อกิโลกรัมเป็นข้อมูลภายใน ไม่รวมอยู่ใน prototype นี้ — แสดงเป็นดัชนีระดับราคา 1–4 แทน</div><table>`+
+      R.active.slice().sort((a,b)=>(b.p*b.tier)-(a.p*a.tier)).slice(0,6)
+       .map(m=>`<tr><td>${m.n} <span style="opacity:.5">(tier ${m.tier})</span></td><td>${(m.p*m.tier/tot*100).toFixed(1)}%</td></tr>`).join('')+'</table>';
   } else if(q==='suppress'){
     const t=R.active.filter(m=>m.l==='top'&&m.audible), b=R.active.filter(m=>m.l==='base'&&m.audible).sort((x,y)=>y.p-x.p)[0];
     h=`<b>สารที่กลบ Top Note อยู่</b><table>`+
       `<tr><td>${b.n} (${b.g})</td><td>${b.p}% — น้ำหนักสูงสุดในชั้น Base</td></tr>`+
       t.slice(0,3).map(m=>`<tr><td>ถูกกลบ: ${m.n}</td><td>${m.p}%</td></tr>`).join('')+'</table>';
   } else if(q==='allergen'){
-    h=`<b>สารที่มีเพดาน IFRA เข้มงวด (เพดาน ≤ 5%)</b><table>`+
-      R.active.filter(m=>m.cap<=5).map(m=>`<tr><td>${m.n}</td><td>${m.p}% / เพดาน ${m.cap}%</td></tr>`).join('')+'</table>';
+    h=`<b>สารที่มีเพดาน IFRA Category 4 (${R.capped.length} ตัว)</b>
+       <div style="opacity:.6;margin:4px 0 8px">เรียงจากที่ใช้เพดานไปมากที่สุด</div><table>`+
+      R.capped.slice().sort((a,b)=>(b.fin/b.cap)-(a.fin/a.cap))
+       .map(m=>`<tr><td>${m.n}</td><td>${m.fin.toFixed(3)}% / ${m.cap}% · ${(m.fin/m.cap*100).toFixed(0)}%</td></tr>`).join('')+'</table>';
   } else {
     h=`<b>คู่กลุ่มที่มี Synergy สูงสุด</b><table>`+
       R.clusters.slice(0,3).map((c,i)=>R.clusters[i+1]
