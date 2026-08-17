@@ -36,3 +36,6 @@ Thumbs.db
 desktop.ini
 __pycache__/
 *.pyc
+
+# ชุดไฟล์ส่งงาน (สร้างด้วย tools/build-submission.py) — ไม่ต้อง commit
+Submission-RAISE-W3/
