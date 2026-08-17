@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Perfumery — Formula Dashboard (Prototype v1)</title>
+<style>
+/* ============================================================
+   Design Tokens — คัดลอกจาก docs/02-design/DESIGN.md
+   ห้ามกำหนดสี/ฟอนต์ใหม่นอกเหนือจากนี้
+   ============================================================ */
+:root {
+  --color-bg: #F3EFE7;
+  --color-ink: #20281F;
+  --color-accent: #C0813A;
+  --color-support: #7E8F6E;
+  --color-heart: #B15E6C;
+  --color-warn: #BD5A2E;
+
+  --color-surface: #FAF8F3;
+  --color-divider: rgba(32, 40, 31, 0.12);
+  --color-ink-muted: rgba(32, 40, 31, 0.62);
+  --color-accent-soft: rgba(192, 129, 58, 0.14);
+  --color-support-soft: rgba(126, 143, 110, 0.16);
+  --color-warn-soft: rgba(189, 90, 46, 0.14);
+
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, 'Segoe UI', 'Noto Sans Thai', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+  --text-hero: 40px; --text-h1: 28px; --text-h2: 20px;
+  --text-body: 15px; --text-small: 13px;
+  --text-data: 15px; --text-data-lg: 26px;
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+  --space-4: 16px; --space-6: 24px; --space-8: 32px;
+  --space-12: 48px; --space-16: 64px;
+
+  --radius-sm: 6px; --radius-md: 12px; --radius-lg: 20px;
+  --shadow-card: 0 1px 2px rgba(32,40,31,.04), 0 8px 24px rgba(32,40,31,.05);
+
+  --motion-fast: 150ms; --motion-base: 240ms; --motion-slow: 400ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  padding: var(--space-8) var(--space-8) 120px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* โมทีฟโครงสร้างโมเลกุล — 6% opacity ตาม DESIGN.md */
+body::before {
+  content: ""; position: fixed; top: -80px; right: -80px;
+  width: 420px; height: 420px; opacity: .06; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 30% 30%, var(--color-ink) 2.5px, transparent 3px),
+    radial-gradient(circle at 70% 40%, var(--color-ink) 2.5px, transparent 3px),
+    radial-gradient(circle at 50% 72%, var(--color-ink) 2.5px, transparent 3px),
+    linear-gradient(28deg, transparent 49%, var(--color-ink) 49%, var(--color-ink) 50.2%, transparent 50.2%),
+    linear-gradient(-62deg, transparent 49%, var(--color-ink) 49%, var(--color-ink) 50.2%, transparent 50.2%);
+}
+
+.wrap { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+
+/* ---------- Header ---------- */
+header { display: flex; justify-content: space-between; align-items: flex-end;
+         gap: var(--space-6); padding-bottom: var(--space-4);
+         border-bottom: 1px solid var(--color-divider); margin-bottom: var(--space-8); }
+.brand { font-family: var(--font-display); font-size: var(--text-h1); letter-spacing: -.01em; }
+.brand small { display: block; font-family: var(--font-body); font-size: var(--text-small);
+               color: var(--color-ink-muted); letter-spacing: .04em; text-transform: uppercase; margin-top: 2px; }
+.user { font-size: var(--text-small); color: var(--color-ink-muted); text-align: right; }
+.user b { color: var(--color-ink); font-weight: 600; }
+
+/* ---------- Layout ---------- */
+.grid { display: grid; grid-template-columns: 380px 1fr; gap: var(--space-8); align-items: start; }
+@media (max-width: 1080px) { .grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--color-surface); border-radius: var(--radius-md);
+        padding: var(--space-6); box-shadow: var(--shadow-card); margin-bottom: var(--space-8); }
+.card h2 { font-size: var(--text-h2); font-family: var(--font-display); margin-bottom: var(--space-1); }
+.card .sub { font-size: var(--text-small); color: var(--color-ink-muted); margin-bottom: var(--space-4); }
+
+/* ---------- Formula panel ---------- */
+.rows { border-top: 1px solid var(--color-divider); }
+.row { display: grid; grid-template-columns: 1fr 74px; gap: var(--space-3);
+       align-items: center; padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); }
+.row .nm { font-size: var(--text-small); line-height: 1.35; }
+.row .nm b { display: block; font-weight: 600; font-size: 14px; }
+.row .nm span { color: var(--color-ink-muted); font-family: var(--font-mono); font-size: 11.5px; }
+.row input { width: 100%; font-family: var(--font-mono); font-size: var(--text-data);
+             text-align: right; padding: var(--space-2); border: 1px solid var(--color-divider);
+             border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-ink);
+             transition: border-color var(--motion-fast) var(--ease); }
+.row input:focus { outline: none; border-color: var(--color-accent); }
+.row.over input { border-color: var(--color-warn); background: var(--color-warn-soft); }
+
+.total { display: flex; justify-content: space-between; align-items: baseline;
+         margin-top: var(--space-4); padding-top: var(--space-4); border-top: 2px solid var(--color-ink); }
+.total .lbl { font-size: var(--text-small); color: var(--color-ink-muted); }
+.total .val { font-family: var(--font-mono); font-size: var(--text-data-lg); font-weight: 600;
+              transition: color var(--motion-base) var(--ease); }
+.total .val.ok { color: var(--color-support); }
+.total .val.bad { color: var(--color-warn); }
+.hint { font-size: var(--text-small); margin-top: var(--space-2); min-height: 20px; }
+.hint.bad { color: var(--color-warn); }
+.hint.ok { color: var(--color-support); }
+
+button.calc { width: 100%; margin-top: var(--space-4); padding: var(--space-3) var(--space-4);
+  background: var(--color-accent); color: #fff; border: none; border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: var(--text-body); font-weight: 600; cursor: pointer;
+  transition: opacity var(--motion-fast) var(--ease); }
+button.calc:hover:not(:disabled) { opacity: .88; }
+button.calc:disabled { background: var(--color-divider); color: var(--color-ink-muted); cursor: not-allowed; }
+
+/* ---------- Hero ---------- */
+.hero { background: var(--color-ink); color: var(--color-bg); border-radius: var(--radius-lg);
+        padding: var(--space-8); margin-bottom: var(--space-8); box-shadow: var(--shadow-card); }
+.hero .tag { font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+             color: var(--color-accent); margin-bottom: var(--space-3); font-weight: 600; }
+.hero .profile { font-family: var(--font-display); font-size: var(--text-hero);
+                 line-height: 1.18; letter-spacing: -.015em; }
+.hero .detail { margin-top: var(--space-4); font-size: var(--text-body); opacity: .82; }
+.ai-note { margin-top: var(--space-4); padding-top: var(--space-3);
+           border-top: 1px solid rgba(243,239,231,.18); font-size: var(--text-small); opacity: .72; }
+.tone { display: flex; gap: var(--space-2); margin-top: var(--space-4); flex-wrap: wrap; }
+.tone button { background: transparent; border: 1px solid rgba(243,239,231,.3); color: var(--color-bg);
+  padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: var(--text-small); cursor: pointer;
+  transition: all var(--motion-fast) var(--ease); }
+.tone button:hover { border-color: var(--color-accent); }
+.tone button.on { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+
+/* ---------- Alerts ---------- */
+.alerts { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-8); }
+.alert { display: flex; align-items: flex-start; gap: var(--space-3);
+         padding: var(--space-4); border-radius: var(--radius-md); font-size: var(--text-body); }
+.alert.pass { background: var(--color-support-soft); border-left: 3px solid var(--color-support); }
+.alert.warn { background: var(--color-warn-soft); border-left: 3px solid var(--color-warn); }
+.alert .ic { font-family: var(--font-mono); font-weight: 700; font-size: var(--text-small);
+             padding: 2px var(--space-2); border-radius: var(--radius-sm); white-space: nowrap; }
+.alert.pass .ic { background: var(--color-support); color: #fff; }
+.alert.warn .ic { background: var(--color-warn); color: #fff; }
+.alert .bd b { display: block; margin-bottom: 2px; }
+.alert .bd span { font-size: var(--text-small); color: var(--color-ink-muted); }
+.alert .bd code { font-family: var(--font-mono); font-size: var(--text-small);
+                  background: rgba(32,40,31,.07); padding: 1px 5px; border-radius: 4px; }
+.alert button.fix { margin-left: auto; align-self: center; background: transparent;
+  border: 1px solid var(--color-warn); color: var(--color-warn); padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm); font-family: var(--font-body); font-size: var(--text-small);
+  cursor: pointer; white-space: nowrap; }
+.alert button.fix:hover { background: var(--color-warn); color: #fff; }
+
+/* ---------- Two column ---------- */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
+@media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+
+/* ---------- Pyramid (Signature element) ---------- */
+.pyr { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin: var(--space-4) 0; }
+.layer { position: relative; border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4);
+         color: #fff; text-align: center; transition: width var(--motion-slow) var(--ease); }
+.layer.top   { background: var(--color-accent); width: 52%; }
+.layer.heart { background: var(--color-heart);  width: 74%; }
+.layer.base  { background: var(--color-ink);    width: 96%; }
+.layer .lname { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+.layer .lval { font-family: var(--font-display); font-size: 17px; margin-top: 2px; }
+.layer .ltime { font-family: var(--font-mono); font-size: 11px; opacity: .75; }
+
+.perf { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-4); }
+.stat { background: var(--color-bg); border-radius: var(--radius-sm); padding: var(--space-3);
+        text-align: center; cursor: pointer; transition: background var(--motion-fast) var(--ease); }
+.stat:hover { background: var(--color-accent-soft); }
+.stat .k { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--color-ink-muted); }
+.stat .v { font-family: var(--font-mono); font-size: var(--text-data-lg); font-weight: 600; margin-top: 2px; }
+.stat .why { font-size: 11px; color: var(--color-accent); margin-top: 2px; }
+
+/* ---------- Spectrum ---------- */
+.spec { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-4); }
+.bar { display: grid; grid-template-columns: 152px 1fr 52px; gap: var(--space-3); align-items: center; font-size: var(--text-small); }
+.bar .track { height: 9px; background: var(--color-divider); border-radius: 99px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--color-support); border-radius: 99px;
+             transition: width var(--motion-slow) var(--ease); }
+.bar .fill.hi { background: var(--color-accent); }
+.bar .pc { font-family: var(--font-mono); text-align: right; }
+.more { display: inline-block; margin-top: var(--space-4); font-size: var(--text-small);
+        color: var(--color-accent); cursor: pointer; border-bottom: 1px solid var(--color-accent-soft); }
+
+/* ---------- ODT list ---------- */
+.odt { margin-top: var(--space-3); }
+.odt .it { display: flex; justify-content: space-between; gap: var(--space-3);
+           padding: var(--space-3) 0; border-bottom: 1px solid var(--color-divider); font-size: var(--text-small); }
+.odt .it b { font-weight: 600; }
+.odt .it .num { font-family: var(--font-mono); color: var(--color-ink-muted); text-align: right; white-space: nowrap; }
+.note { margin-top: var(--space-3); font-size: var(--text-small); color: var(--color-ink-muted);
+        background: var(--color-bg); padding: var(--space-3); border-radius: var(--radius-sm); }
+
+/* ---------- Command bar ---------- */
+.cmd { position: fixed; left: 50%; bottom: var(--space-6); transform: translateX(-50%);
+       width: min(920px, calc(100% - 48px)); background: var(--color-ink); color: var(--color-bg);
+       border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4);
+       box-shadow: 0 12px 40px rgba(32,40,31,.22); z-index: 20; }
+.cmd .line { display: flex; align-items: center; gap: var(--space-3); }
+.cmd .pr { font-family: var(--font-mono); color: var(--color-accent); }
+.cmd input { flex: 1; background: transparent; border: none; color: var(--color-bg);
+             font-family: var(--font-body); font-size: var(--text-body); }
+.cmd input:focus { outline: none; }
+.cmd input::placeholder { color: rgba(243,239,231,.45); }
+.chips { display: flex; gap: var(--space-2); margin-top: var(--space-3); flex-wrap: wrap; }
+.chips button { background: rgba(243,239,231,.1); border: none; color: var(--color-bg);
+  padding: var(--space-1) var(--space-3); border-radius: 99px;
+  font-family: var(--font-body); font-size: var(--text-small); cursor: pointer;
+  transition: background var(--motion-fast) var(--ease); }
+.chips button:hover { background: var(--color-accent); }
+.cmdout { margin-top: var(--space-3); padding-top: var(--space-3);
+          border-top: 1px solid rgba(243,239,231,.18); font-size: var(--text-small); display: none; }
+.cmdout.on { display: block; }
+.cmdout table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; }
+.cmdout td { padding: 3px 0; }
+.cmdout td:last-child { text-align: right; }
+
+/* ---------- Explain popover ---------- */
+.expl { position: fixed; inset: 0; background: rgba(32,40,31,.42);
+        display: none; align-items: center; justify-content: center; z-index: 40; padding: var(--space-6); }
+.expl.on { display: flex; }
+.expl .box { background: var(--color-surface); border-radius: var(--radius-lg);
+             padding: var(--space-8); max-width: 520px; box-shadow: var(--shadow-card); }
+.expl h3 { font-family: var(--font-display); font-size: var(--text-h2); margin-bottom: var(--space-3); }
+.expl .close { margin-top: var(--space-6); background: var(--color-ink); color: var(--color-bg);
+  border: none; padding: var(--space-2) var(--space-6); border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-body); }
+.expl ul { margin: var(--space-3) 0 0 var(--space-4); font-size: var(--text-small); }
+.expl li { margin-bottom: var(--space-2); }
+.expl code { font-family: var(--font-mono); background: var(--color-bg); padding: 1px 5px; border-radius: 4px; }
+
+/* ---------- misc ---------- */
+.export { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-4); }
+.export button { background: transparent; border: 1px solid var(--color-ink); color: var(--color-ink);
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm);
+  font-family: var(--font-body); font-size: var(--text-small); cursor: pointer; }
+.export button:disabled { border-color: var(--color-divider); color: var(--color-ink-muted); cursor: not-allowed; }
+.export .rsn { font-size: var(--text-small); color: var(--color-warn); }
+#dash { display: none; }
+#dash.on { display: block; }
+.empty { text-align: center; padding: var(--space-16) var(--space-6); color: var(--color-ink-muted); }
+.empty .big { font-family: var(--font-display); font-size: var(--text-h1); color: var(--color-ink); margin-bottom: var(--space-3); }
+.protolabel { position: fixed; top: 0; left: 0; background: var(--color-accent); color: #fff;
+  font-size: 11px; letter-spacing: .1em; padding: 3px 10px; border-bottom-right-radius: var(--radius-sm);
+  font-family: var(--font-mono); z-index: 50; }
+</style>
+</head>
+<body>
+<div class="protolabel">PROTOTYPE v1 · 20260818-01</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">AI Perfumery
+      <small>Formulation Assistant</small>
+    </div>
+    <div class="user">
+      เข้าสู่ระบบในชื่อ <b>มาย (Perfumer)</b><br>
+      สูตร: <b>EDP-Amber-Sage No.4</b> · เวอร์ชัน 3
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- ============ ซ้าย: ป้อนสูตร (FR-01, FR-02, FR-03) ============ -->
+    <div>
+      <div class="card">
+        <h2>สูตรน้ำหอม</h2>
+        <p class="sub">FR-01 · FR-02 · FR-03 — แก้ % แล้วระบบตรวจให้ทันที</p>
+        <div class="rows" id="rows"></div>
+
+        <div class="total">
+          <span class="lbl">ผลรวมสัดส่วน</span>
+          <span class="val" id="total">100.0%</span>
+        </div>
+        <div class="hint" id="hint"></div>
+        <button class="calc" id="btnCalc">คำนวณสูตร</button>
+      </div>
+    </div>
+
+    <!-- ============ ขวา: Dashboard ============ -->
+    <div>
+      <div class="empty" id="empty">
+        <div class="big">ยังไม่มีผลการคำนวณ</div>
+        <p>ตรวจสอบให้ผลรวมสัดส่วนเท่ากับ 100% แล้วกดปุ่ม “คำนวณสูตร”</p>
+      </div>
+
+      <div id="dash">
+
+        <!-- Hero: AI Auto-Generated Profile (FR-18, FR-20, NFR-12) -->
+        <div class="hero">
+          <div class="tag">AI Auto-Generated Profile</div>
+          <div class="profile" id="profile"></div>
+          <div class="detail" id="profileDetail"></div>
+          <div class="tone">
+            <button class="on" data-tone="chem">โทนเชิงเคมี</button>
+            <button data-tone="mkt">โทนการตลาด</button>
+            <button data-tone="en">English</button>
+          </div>
+          <div class="ai-note">
+            ⚗️ คำบรรยายนี้สร้างโดย AI จากผลการคำนวณของ Engine A — ตัวเลขทุกตัวมาจาก Engine A เท่านั้น
+            <b>ต้องผ่านการยืนยันจากนักปรุงน้ำหอมก่อนนำไปใช้จริง</b> <span style="opacity:.6">(NFR-12)</span>
+          </div>
+        </div>
+
+        <!-- System Alerts (FR-21, FR-22, FR-23) -->
+        <div class="alerts" id="alerts"></div>
+
+        <div class="two">
+          <!-- Scent Pyramid — Signature Element (FR-27, FR-13, FR-14) -->
+          <div class="card">
+            <h2>พีระมิดกลิ่น</h2>
+            <p class="sub">FR-27 · FR-12 — โครงสร้างจาก Time-Series การระเหย</p>
+            <div class="pyr">
+              <div class="layer top">
+                <div class="lname">Top Accord</div>
+                <div class="lval" id="pTop"></div>
+                <div class="ltime">0–15 นาที</div>
+              </div>
+              <div class="layer heart">
+                <div class="lname">Heart Accord</div>
+                <div class="lval" id="pHeart"></div>
+                <div class="ltime">1–4 ชั่วโมง</div>
+              </div>
+              <div class="layer base">
+                <div class="lname">Base Accord</div>
+                <div class="lval" id="pBase"></div>
+                <div class="ltime">6+ ชั่วโมง</div>
+              </div>
+            </div>
+            <div class="perf">
+              <div class="stat" data-explain="longevity">
+                <div class="k">Longevity</div>
+                <div class="v" id="sLong"></div>
+                <div class="why">ดูที่มา ↗</div>
+              </div>
+              <div class="stat" data-explain="sillage">
+                <div class="k">Sillage</div>
+                <div class="v" id="sSil" style="font-size:19px"></div>
+                <div class="why">ดูที่มา ↗</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Micro-Cluster Spectrum (FR-08, FR-28) -->
+          <div class="card">
+            <h2>Micro-Cluster Spectrum</h2>
+            <p class="sub">FR-08 — แสดงกลุ่มเด่นเท่านั้น ไม่โชว์ทั้ง 100 กลุ่มพร้อมกัน</p>
+            <div class="spec" id="spec"></div>
+            <span class="more" id="moreClusters">ดูทั้งหมด 100 กลุ่ม →</span>
+          </div>
+        </div>
+
+        <!-- ODT filtered (FR-16, FR-17, NFR-08) -->
+        <div class="card">
+          <h2>สารที่ถูกตัดจากบรีฟ</h2>
+          <p class="sub">FR-16 · FR-17 — ความเข้มข้นที่ระเหยจริงต่ำกว่าเกณฑ์ที่จมูกมนุษย์รับรู้ได้ (ODT)</p>
+          <div class="odt" id="odt"></div>
+          <div class="note">
+            ℹ️ สารเหล่านี้ <b>ยังถูกนับในการคำนวณ IFRA และต้นทุน</b> — ถูกตัดเฉพาะจากคำบรรยายกลิ่นเท่านั้น
+            เพราะจมูกมนุษย์ไม่รับรู้ที่ความเข้มข้นระดับนี้
+          </div>
+          <div class="export">
+            <button id="btnExport">Export รายงานฉบับสมบูรณ์</button>
+            <span class="rsn" id="exportRsn"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Command Bar (FR-29) -->
+<div class="cmd">
+  <div class="line">
+    <span class="pr">&gt;</span>
+    <input id="cmdIn" placeholder="ถามเจาะลึกได้ เช่น “สารตัวไหนกลบ Top Note อยู่?”">
+  </div>
+  <div class="chips">
+    <button data-q="cost">ต้นทุนต่อกิโลกรัม</button>
+    <button data-q="synergy">ดูคู่ Synergy</button>
+    <button data-q="allergen">ตารางสารก่อแพ้</button>
+    <button data-q="suppress">สารที่กลบ Top Note</button>
+  </div>
+  <div class="cmdout" id="cmdOut"></div>
+</div>
+
+<!-- Explainability modal (NFR-08) -->
+<div class="expl" id="expl">
+  <div class="box">
+    <h3 id="explTitle"></h3>
+    <div id="explBody"></div>
+    <button class="close" id="explClose">ปิด</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Prototype Logic
+   หมายเหตุ: การคำนวณทั้งหมดเป็น deterministic (ไม่มี Math.random)
+   ตาม NFR-03 — input เดิมให้ผลลัพธ์เดิมทุกครั้ง
+   ตัวเลขเป็นค่าสมมติสำหรับสาธิต UI เท่านั้น ไม่ใช่ค่าเคมีจริง
+   ============================================================ */
+
+const MATERIALS = [
+  // code   ชื่อ                      cluster                 layer   pct   ifraCap  odt   ppmK  ราคา/กก.
+  { c:'RM-004', n:'Bergamot Oil',        g:'Citrus Bright',     l:'top',   p:18.0, cap:20.0, odt:0.8, k:0.30, pr:3200 },
+  { c:'RM-011', n:'Linalool',            g:'Floral Fresh',      l:'top',   p: 8.5, cap:12.0, odt:0.5, k:0.28, pr:1400 },
+  { c:'RM-014', n:'Citral',              g:'Citrus Bright',     l:'top',   p: 2.4, cap: 3.0, odt:0.4, k:0.26, pr:1900 },
+  { c:'RM-023', n:'Rose Absolute',       g:'Rose Attar',        l:'heart', p:12.0, cap:18.0, odt:0.6, k:0.16, pr:48000 },
+  { c:'RM-031', n:'Jasmine Sambac Abs.', g:'White Floral',      l:'heart', p: 7.4, cap:10.0, odt:0.5, k:0.15, pr:52000 },
+  { c:'RM-038', n:'Clary Sage Oil',      g:'Herbal Green',      l:'heart', p: 6.0, cap: 9.0, odt:0.7, k:0.18, pr:6800 },
+  { c:'RM-046', n:'Iso E Super',         g:'Woody Amber',       l:'base',  p:26.07,cap:30.0, odt:0.3, k:0.09, pr:2100 },
+  { c:'RM-052', n:'Cedarwood Virginia',  g:'Woody Amber',       l:'base',  p:10.5, cap:15.0, odt:0.4, k:0.08, pr:1700 },
+  { c:'RM-060', n:'Ambroxan',            g:'Amber Musk',        l:'base',  p: 9.0, cap:12.0, odt:0.2, k:0.07, pr:9400 },
+  { c:'RM-077', n:'Gamma-Decalactone',   g:'Creamy Lactonic',   l:'heart', p: 0.06,cap: 2.0, odt:0.4, k:0.14, pr:5600 },
+  { c:'RM-081', n:'Ethyl Maltol',        g:'Sweet Gourmand',    l:'base',  p: 0.04,cap: 1.5, odt:0.3, k:0.10, pr:2400 },
+  { c:'RM-092', n:'Trace Aldehyde C-12', g:'Aldehydic',         l:'top',   p: 0.03,cap: 1.0, odt:0.5, k:0.32, pr:3100 },
+];
+
+const rowsEl=document.getElementById('rows'), totalEl=document.getElementById('total'),
+      hintEl=document.getElementById('hint'), btnCalc=document.getElementById('btnCalc'),
+      dash=document.getElementById('dash'), empty=document.getElementById('empty');
+let calculated=false, tone='chem';
+
+/* ---------- render formula rows ---------- */
+MATERIALS.forEach((m,i)=>{
+  const r=document.createElement('div');
+  r.className='row'; r.id='row'+i;
+  r.innerHTML=`<div class="nm"><b>${m.n}</b><span>${m.c} · ${m.g}</span></div>
+               <input type="number" step="0.1" min="0" value="${m.p.toFixed(2)}" data-i="${i}">`;
+  rowsEl.appendChild(r);
+});
+
+rowsEl.addEventListener('input', e=>{
+  if(e.target.tagName!=='INPUT') return;
+  const i=+e.target.dataset.i;
+  MATERIALS[i].p = parseFloat(e.target.value)||0;
+  checkTotal();
+  if(calculated) render();          // FR-21 / NFR-02 — ตรวจซ้ำอัตโนมัติ ไม่ต้องกดคำนวณใหม่
+});
+
+/* ---------- FR-02: ตรวจผลรวม 100% ---------- */
+function sum(){ return MATERIALS.reduce((a,m)=>a+m.p,0); }
+
+function checkTotal(){
+  const s=sum(), d=+(s-100).toFixed(2);
+  totalEl.textContent=s.toFixed(1)+'%';
+  if(Math.abs(d)<0.005){
+    totalEl.className='val ok';
+    hintEl.className='hint ok'; hintEl.textContent='✓ ผลรวมครบ 100% — คำนวณได้';
+    btnCalc.disabled=false;
+  }else{
+    totalEl.className='val bad';
+    hintEl.className='hint bad';
+    hintEl.textContent = d<0 ? `ขาดอีก ${Math.abs(d).toFixed(2)}%` : `เกินมา ${d.toFixed(2)}%`;
+    btnCalc.disabled=true;
+  }
+  MATERIALS.forEach((m,i)=>
+    document.getElementById('row'+i).classList.toggle('over', m.p>m.cap));
+}
+
+btnCalc.addEventListener('click', ()=>{
+  calculated=true; empty.style.display='none'; dash.classList.add('on'); render();
+});
+
+/* ---------- Engine A (จำลอง) ---------- */
+function engineA(){
+  const active=MATERIALS.filter(m=>m.p>0);
+
+  // FR-16: ppm ที่ระเหยจริง → เทียบ ODT
+  active.forEach(m=>{ m.ppm=+(m.p*m.k).toFixed(3); m.audible = m.ppm >= m.odt; });
+
+  // FR-08: น้ำหนักรายกลุ่ม (นับเฉพาะสารที่จมูกรับรู้ได้ → FR-17)
+  const groups={};
+  active.filter(m=>m.audible).forEach(m=> groups[m.g]=(groups[m.g]||0)+m.p );
+  const gTotal=Object.values(groups).reduce((a,b)=>a+b,0)||1;
+  const clusters=Object.entries(groups)
+    .map(([g,v])=>({g, pct:+(v/gTotal*100).toFixed(1)}))
+    .sort((a,b)=>b.pct-a.pct);
+
+  // FR-12: แยกชั้นตาม Time-Series
+  const layer=l=>active.filter(m=>m.audible&&m.l===l);
+  const lp=l=>layer(l).reduce((a,m)=>a+m.p,0);
+  const tp=lp('top'), hp=lp('heart'), bp=lp('base'), lt=(tp+hp+bp)||1;
+
+  // FR-13 / FR-14: Longevity & Sillage จากสัดส่วนชั้น base และ top
+  const baseShare=bp/lt, topShare=tp/lt;
+  const lo=+(3.0+baseShare*11).toFixed(1), hi=+(lo+1.6).toFixed(1);
+  const sillage = topShare>0.30 ? 'good' : topShare>0.18 ? 'moderate' : 'intimate';
+
+  // FR-21: IFRA
+  const viol=active.filter(m=>m.p>m.cap).map(m=>({...m, over:+(m.p-m.cap).toFixed(2)}));
+
+  // FR-23 / BR-04: Muddy Accord
+  const pcts=clusters.map(c=>c.pct);
+  const mx=Math.max(...pcts), mn=Math.min(...pcts);
+  const muddy = !(mx>20) && !(mn<5);
+  const risk = muddy ? Math.round(100-(mx-mn)*2.6) : Math.max(0, Math.round(46-(mx-mn)));
+
+  const topGroup = l => { const s={};
+    layer(l).forEach(m=> s[m.g]=(s[m.g]||0)+m.p );
+    const e=Object.entries(s).sort((a,b)=>b[1]-a[1]);
+    return e.length? {g:e[0][0], pct:+(e[0][1]/lt*100).toFixed(1)} : {g:'—', pct:0}; };
+
+  return { active, clusters, viol, muddy, risk:Math.min(100,Math.max(0,risk)),
+           lo, hi, sillage, tp:+(tp/lt*100).toFixed(1), hp:+(hp/lt*100).toFixed(1), bp:+(bp/lt*100).toFixed(1),
+           pTop:topGroup('top'), pHeart:topGroup('heart'), pBase:topGroup('base'),
+           filtered: active.filter(m=>!m.audible),
+           cost: Math.round(active.reduce((a,m)=>a+m.p/100*m.pr,0)) };
+}
+
+/* ---------- Engine B (แปลผลเป็นภาษา — ห้ามสร้างตัวเลขเอง / FR-19, BR-05) ---------- */
+function engineB(r){
+  const T=r.pTop.g, H=r.pHeart.g, B=r.pBase.g;
+  if(tone==='mkt')
+    return {t:`เปิดตัวสดใสด้วย${T} ก่อนคลี่เป็น${H} แล้วทิ้งท้ายอบอุ่นด้วย${B}`,
+            d:`ติดทน ${r.lo}–${r.hi} ชั่วโมง · การกระจายตัวระดับ ${r.sillage}`};
+  if(tone==='en')
+    return {t:`${T} opening, ${H} heart, resting on ${B}`,
+            d:`Longevity ${r.lo}–${r.hi} h · Sillage: ${r.sillage}`};
+  return {t:`${T} ${r.pTop.pct}% → ${H} ${r.pHeart.pct}% → ${B} ${r.pBase.pct}%`,
+          d:`โครงสร้างชั้น Top ${r.tp}% · Heart ${r.hp}% · Base ${r.bp}% — Longevity ${r.lo}–${r.hi} ชม. · Sillage ${r.sillage}`};
+}
+
+/* ---------- render dashboard ---------- */
+let R=null;
+function render(){
+  R=engineA(); const b=engineB(R);
+
+  document.getElementById('profile').textContent=b.t;
+  document.getElementById('profileDetail').textContent=b.d;
+  document.getElementById('pTop').textContent   = `${R.pTop.g} · ${R.pTop.pct}%`;
+  document.getElementById('pHeart').textContent = `${R.pHeart.g} · ${R.pHeart.pct}%`;
+  document.getElementById('pBase').textContent  = `${R.pBase.g} · ${R.pBase.pct}%`;
+  document.getElementById('sLong').textContent  = `${R.lo}–${R.hi} ชม.`;
+  document.getElementById('sSil').textContent   = R.sillage;
+
+  // Alerts — FR-22 / FR-23
+  const A=document.getElementById('alerts'); A.innerHTML='';
+  if(R.viol.length){
+    A.innerHTML += `<div class="alert warn">
+      <span class="ic">IFRA FAIL</span>
+      <div class="bd"><b>เกินเพดาน IFRA 51st Amendment</b>
+        <span>${R.viol.map(v=>`<code>${v.c} ${v.n}</code> เกินมา ${v.over}% (เพดาน ${v.cap}%)`).join(' · ')}</span>
+      </div></div>`;
+  }else{
+    const near=R.active.reduce((a,m)=>(m.cap-m.p)<(a.cap-a.p)?m:a);
+    A.innerHTML += `<div class="alert pass">
+      <span class="ic">IFRA PASS</span>
+      <div class="bd"><b>ผ่านเกณฑ์ IFRA 51st Amendment ทุกสาร</b>
+        <span>สารที่ใกล้เพดานที่สุดคือ <code>${near.n}</code> — ยังเหลือระยะห่างอีก ${(near.cap-near.p).toFixed(2)}%</span>
+      </div></div>`;
+  }
+  A.innerHTML += R.muddy
+    ? `<div class="alert warn"><span class="ic">MUDDY ${R.risk}%</span>
+       <div class="bd"><b>เสี่ยงกลิ่นตีกันไร้มิติ (Muddy Accord)</b>
+       <span>ไม่มีกลุ่มใดสูงกว่า 20% และไม่มีกลุ่มใดต่ำกว่า 5% — กลิ่นกระจายเท่ากันหมด (BR-04)</span></div>
+       <button class="fix" id="btnFix">ขอคำแนะนำปรับลด</button></div>`
+    : `<div class="alert pass"><span class="ic">MUDDY ${R.risk}%</span>
+       <div class="bd"><b>โครงสร้างกลุ่มกลิ่นมีมิติดี</b>
+       <span>กลุ่มเด่นสูงสุด ${R.clusters[0].pct}% · กลุ่มต่ำสุด ${R.clusters[R.clusters.length-1].pct}% — ผ่านเกณฑ์ BR-04</span></div></div>`;
+
+  const fix=document.getElementById('btnFix');
+  if(fix) fix.onclick=()=>explain('muddy');
+
+  // Spectrum — FR-08
+  const S=document.getElementById('spec'); S.innerHTML='';
+  R.clusters.slice(0,8).forEach((c,i)=>{
+    S.innerHTML += `<div class="bar"><span>${c.g}</span>
+      <div class="track"><div class="fill ${i===0?'hi':''}" style="width:${Math.min(100,c.pct*2.6)}%"></div></div>
+      <span class="pc">${c.pct}%</span></div>`;
+  });
+
+  // ODT filtered — FR-17
+  const O=document.getElementById('odt');
+  O.innerHTML = R.filtered.length
+    ? R.filtered.map(m=>`<div class="it">
+        <div><b>${m.n}</b> <span style="color:var(--color-ink-muted)">${m.c}</span></div>
+        <div class="num">${m.ppm} ppm &lt; ODT ${m.odt} ppm</div></div>`).join('')
+    : `<div class="it"><div>ไม่มีสารที่ถูกตัด — ทุกสารอยู่เหนือเกณฑ์ ODT</div></div>`;
+
+  // Export — BR-02
+  const ex=document.getElementById('btnExport'), rs=document.getElementById('exportRsn');
+  ex.disabled=!!R.viol.length;
+  rs.textContent = R.viol.length ? '⚠ ปิดใช้งาน — สูตรยังไม่ผ่านเกณฑ์ IFRA (BR-02)' : '';
+}
+
+/* ---------- tone switch ---------- */
+document.querySelectorAll('.tone button').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.tone button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); tone=b.dataset.tone; if(calculated) render(); };
+});
+
+/* ---------- Explainability — NFR-08 ---------- */
+const expl=document.getElementById('expl');
+document.querySelectorAll('.stat').forEach(s=> s.onclick=()=>explain(s.dataset.explain));
+document.getElementById('explClose').onclick=()=>expl.classList.remove('on');
+expl.onclick=e=>{ if(e.target===expl) expl.classList.remove('on'); };
+document.getElementById('moreClusters').onclick=()=>explain('clusters');
+
+function explain(k){
+  if(!R) return;
+  const T=document.getElementById('explTitle'), B=document.getElementById('explBody');
+  if(k==='longevity'){
+    T.textContent='ที่มาของค่า Longevity';
+    B.innerHTML=`<p>ค่า <code>${R.lo}–${R.hi} ชม.</code> คำนวณจากสัดส่วนของสารชั้น Base ที่จมูกรับรู้ได้</p>
+      <ul><li>สัดส่วนชั้น Base ในสูตร: <code>${R.bp}%</code></li>
+      <li>กลุ่มที่มีผลมากที่สุด: <code>${R.pBase.g}</code></li>
+      <li>สารที่มีน้ำหนักสูงสุดในชั้นนี้: ${R.active.filter(m=>m.l==='base'&&m.audible).sort((a,b)=>b.p-a.p).slice(0,2).map(m=>`<code>${m.n} ${m.p}%</code>`).join(', ')}</li></ul>
+      <p style="margin-top:12px;font-size:13px;color:var(--color-ink-muted)">ทุกค่ามาจาก Engine A — Engine B ไม่มีสิทธิ์แก้ไข (FR-19)</p>`;
+  } else if(k==='sillage'){
+    T.textContent='ที่มาของค่า Sillage';
+    B.innerHTML=`<p>ค่า <code>${R.sillage}</code> คำนวณจากสัดส่วนสารชั้น Top ที่ระเหยเร็ว</p>
+      <ul><li>สัดส่วนชั้น Top: <code>${R.tp}%</code></li>
+      <li>เกณฑ์: &gt; 30% = good · 18–30% = moderate · &lt; 18% = intimate</li></ul>`;
+  } else if(k==='muddy'){
+    T.textContent='คำแนะนำปรับลด Muddy Accord';
+    const top=R.clusters[0], bot=R.clusters[R.clusters.length-1];
+    B.innerHTML=`<p>เกณฑ์ BR-04: ต้องมีกลุ่มใดกลุ่มหนึ่ง <b>สูงกว่า 20%</b> หรือมีกลุ่มใด <b>ต่ำกว่า 5%</b> เพื่อให้กลิ่นมีมิติ</p>
+      <ul><li>กลุ่มเด่นที่สุดตอนนี้: <code>${top.g} ${top.pct}%</code> — แนะนำเพิ่มให้เกิน 20%</li>
+      <li>กลุ่มที่ต่ำที่สุด: <code>${bot.g} ${bot.pct}%</code> — หรือลดให้ต่ำกว่า 5%</li>
+      <li>ค่าความเสี่ยงปัจจุบัน: <code>${R.risk}%</code></li></ul>`;
+  } else {
+    T.textContent='Micro-Cluster ทั้งหมด';
+    B.innerHTML=`<p>สูตรนี้แตะ <code>${R.clusters.length}</code> กลุ่ม จากทั้งหมด 100 Fixed Micro-Clusters</p>
+      <ul>${R.clusters.map(c=>`<li><code>${c.g}</code> — ${c.pct}%</li>`).join('')}</ul>`;
+  }
+  expl.classList.add('on');
+}
+
+/* ---------- Command Bar — FR-29 ---------- */
+const out=document.getElementById('cmdOut');
+document.querySelectorAll('.chips button').forEach(b=> b.onclick=()=>cmd(b.dataset.q));
+document.getElementById('cmdIn').addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  const t=e.target.value.toLowerCase();
+  cmd(t.includes('ต้นทุน')?'cost': t.includes('กลบ')?'suppress': t.includes('แพ้')?'allergen':'synergy');
+  e.target.value='';
+});
+function cmd(q){
+  if(!R){ out.className='cmdout on'; out.innerHTML='ยังไม่มีผลการคำนวณ — กดปุ่ม “คำนวณสูตร” ก่อน'; return; }
+  let h='';
+  if(q==='cost'){
+    h=`<b>ต้นทุนวัตถุดิบ ≈ ${R.cost.toLocaleString()} บาท/กก.</b><table>`+
+      R.active.slice().sort((a,b)=>(b.p*b.pr)-(a.p*a.pr)).slice(0,5)
+       .map(m=>`<tr><td>${m.n}</td><td>${Math.round(m.p/100*m.pr).toLocaleString()} ฿</td></tr>`).join('')+'</table>';
+  } else if(q==='suppress'){
+    const t=R.active.filter(m=>m.l==='top'&&m.audible), b=R.active.filter(m=>m.l==='base'&&m.audible).sort((x,y)=>y.p-x.p)[0];
+    h=`<b>สารที่กลบ Top Note อยู่</b><table>`+
+      `<tr><td>${b.n} (${b.g})</td><td>${b.p}% — น้ำหนักสูงสุดในชั้น Base</td></tr>`+
+      t.slice(0,3).map(m=>`<tr><td>ถูกกลบ: ${m.n}</td><td>${m.p}%</td></tr>`).join('')+'</table>';
+  } else if(q==='allergen'){
+    h=`<b>สารที่มีเพดาน IFRA เข้มงวด (เพดาน ≤ 5%)</b><table>`+
+      R.active.filter(m=>m.cap<=5).map(m=>`<tr><td>${m.n}</td><td>${m.p}% / เพดาน ${m.cap}%</td></tr>`).join('')+'</table>';
+  } else {
+    h=`<b>คู่กลุ่มที่มี Synergy สูงสุด</b><table>`+
+      R.clusters.slice(0,3).map((c,i)=>R.clusters[i+1]
+        ? `<tr><td>${c.g} × ${R.clusters[i+1].g}</td><td>${(c.pct*R.clusters[i+1].pct/100).toFixed(2)} idx</td></tr>`:'').join('')+'</table>';
+  }
+  out.className='cmdout on'; out.innerHTML=h;
+}
+
+/* ---------- init ---------- */
+checkTotal();
+</script>
+</body>
+</html>
