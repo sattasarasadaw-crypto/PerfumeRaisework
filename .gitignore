@@ -29,6 +29,9 @@ cookie.txt
 *secret*
 *credential*
 
+# dependencies
+node_modules/
+
 # ระบบ
 .obsidian/workspace.json
 .DS_Store

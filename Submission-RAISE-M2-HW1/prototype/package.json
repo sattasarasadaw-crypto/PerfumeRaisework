@@ -1,0 +1,12 @@
+{
+  "name": "module2-hw1-formula-memory",
+  "private": true,
+  "type": "module",
+  "description": "Seed script for Module 2 HW1 (Formula Review) — writes sample data to Firestore in test mode",
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "firebase": "^10.14.1"
+  }
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>รายการสูตรน้ำหอม — Module 2 HW1</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 16px; background: #faf8f5; color: #2b2320; }
+  h1 { font-size: 1.4rem; }
+  .hint { color: #6b6259; font-size: 0.9rem; margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 0.92rem; }
+  th { background: #f1ece4; }
+  .badge { padding: 2px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+  .draft { background: #e8e8e8; color: #555; }
+  .submitted { background: #fff3cd; color: #8a6800; }
+  .approved { background: #d7f5df; color: #1a7a3a; }
+  .rejected { background: #fddede; color: #a31c1c; }
+  #status { font-size: 0.85rem; color: #999; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <h1>🧪 รายการสูตรน้ำหอม (formulas)</h1>
+  <p class="hint">อ่านข้อมูลสด ๆ จาก Firestore (project: sattasarasada-perfume) — แก้ข้อมูลใน Firebase Console แล้วกด F5 หน้านี้ ข้อมูลจะเปลี่ยนตาม</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ชื่อสูตร</th>
+        <th>ประเภท</th>
+        <th>นักปรุง</th>
+        <th>สถานะ</th>
+        <th>โจทย์ (brief)</th>
+      </tr>
+    </thead>
+    <tbody id="rows">
+      <tr><td colspan="5">กำลังโหลด...</td></tr>
+    </tbody>
+  </table>
+  <div id="status"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAU--OrJfjajnO5SEod9rjoM4-CRUiDg3E",
+      authDomain: "sattasarasada-perfume.firebaseapp.com",
+      projectId: "sattasarasada-perfume",
+      storageBucket: "sattasarasada-perfume.firebasestorage.app",
+      messagingSenderId: "263330698195",
+      appId: "1:263330698195:web:d57653b9e847fc492e9526",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const rowsEl = document.getElementById("rows");
+    const statusEl = document.getElementById("status");
+
+    onSnapshot(
+      collection(db, "formulas"),
+      (snapshot) => {
+        if (snapshot.empty) {
+          rowsEl.innerHTML = `<tr><td colspan="5">ยังไม่มีข้อมูล — รัน seed.js ก่อน</td></tr>`;
+          return;
+        }
+        rowsEl.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const f = docSnap.data();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${f.name ?? "-"}</td>
+            <td>${f.fragranceTypeName ?? "-"}</td>
+            <td>${f.perfumerName ?? "-"}</td>
+            <td><span class="badge ${f.status}">${f.status ?? "-"}</span></td>
+            <td>${f.brief ?? "-"}</td>
+          `;
+          rowsEl.appendChild(tr);
+        });
+        statusEl.textContent = `อัปเดตล่าสุด: ${new Date().toLocaleTimeString("th-TH")} (${snapshot.size} รายการ)`;
+      },
+      (err) => {
+        rowsEl.innerHTML = `<tr><td colspan="5">โหลดข้อมูลไม่สำเร็จ: ${err.message}</td></tr>`;
+      }
+    );
+  </script>
+</body>
+</html>
