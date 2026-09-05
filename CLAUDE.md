@@ -4,7 +4,9 @@
 
 ## สถานะของโปรเจกต์
 
-โปรเจกต์นี้คือ **AI Perfumery Formulation Assistant** — ระบบผู้ช่วยปรุงน้ำหอมที่คำนวณจากฟิสิกส์เคมีจริง (ไม่ใช่ Generative AI เดาข้อความ) พื้นที่นี้เป็นส่วนงานเอกสาร requirements/design ของโปรเจกต์ **ยังไม่มีซอร์สโค้ด** จึงยังไม่มีคำสั่ง build, lint หรือ test ให้รัน งานทั้งหมดที่มีอยู่ตอนนี้อยู่ภายใต้โฟลเดอร์ `docs/` ความคืบหน้าของแต่ละขั้นตอน (requirements/design/testing) ไม่เท่ากัน — บางไฟล์มีเนื้อหาแล้ว บางไฟล์/โฟลเดอร์ยังว่างรอเนื้อหาอยู่ ให้ตรวจสถานะจริงของแต่ละไฟล์ก่อนอ้างอิงหรือแก้ไข อย่าเชื่อคำอธิบายสถานะที่เขียนไว้ในเอกสารฉบับเก่า **อย่าสมมติ** ว่ามี tech stack, framework หรือขั้นตอน build อยู่แล้ว จนกว่าจะปรากฏจริงในโปรเจกต์ (`docs/02-design/02-technical/technology-stack.md` คือจุดที่จะกำหนดเรื่องนี้เมื่อมีการตัดสินใจแล้ว)
+โปรเจกต์นี้คือ **AI Perfumery Formulation Assistant** — ระบบผู้ช่วยปรุงน้ำหอมที่คำนวณจากฟิสิกส์เคมีจริง (ไม่ใช่ Generative AI เดาข้อความ) พื้นที่นี้เป็นหลักส่วนงานเอกสาร requirements/design ของโปรเจกต์เต็ม — งานส่วนใหญ่ที่มีอยู่ตอนนี้อยู่ภายใต้โฟลเดอร์ `docs/` และ**ยังไม่มี tech stack/framework ตัดสินใจสำหรับระบบเต็ม** (`docs/02-design/02-technical/technology-stack.md` คือจุดที่จะกำหนดเรื่องนี้เมื่อมีการตัดสินใจแล้ว) — **อย่าสมมติ**ว่ามี stack อยู่แล้วสำหรับงานส่วนนี้ ความคืบหน้าของแต่ละขั้นตอน (requirements/design/testing) ไม่เท่ากัน — บางไฟล์มีเนื้อหาแล้ว บางไฟล์/โฟลเดอร์ยังว่างรอเนื้อหาอยู่ ให้ตรวจสถานะจริงของแต่ละไฟล์ก่อนอ้างอิงหรือแก้ไข อย่าเชื่อคำอธิบายสถานะที่เขียนไว้ในเอกสารฉบับเก่า
+
+นอกจากงานเอกสาร repo นี้ยังมี**ซอร์สโค้ดจริงชิ้นเล็ก** ภายใต้ `Submission-RAISE-M2-HW1/prototype/` (ดูหัวข้อ "งานส่งย่อยที่มีโค้ดจริง" ด้านล่างสำหรับคำสั่งรัน) — เป็นการบ้านคนละชุดกับเอกสาร `docs/` เต็มระบบ ให้แยกบริบทสองส่วนนี้ออกจากกันเสมอเวลาถูกขอให้ช่วยงาน
 
 ## ภาพรวมระบบที่กำลังวางแผน
 
@@ -65,6 +67,7 @@ docs/
     02-test-result/                ผลการรันทดสอบจริง — ยังไม่มีเอกสาร/agent ดูแล เพราะโปรเจกต์ยังไม่มีซอร์สโค้ดให้ทดสอบจริง
   04-retrospectives/
   05-log/
+  06-module2-homework/            หลักฐานส่งงาน Submission-RAISE-M2-HW1 (เช่น screenshot Firebase Console) — อยู่นอกลำดับ SDLC ปกติโดยตั้งใจ เพราะผูกกับการบ้าน Module 2 ไม่ใช่ vault เอกสารระบบเต็ม (ดูหัวข้อ "งานส่งย่อยที่มีโค้ดจริง" ด้านล่าง)
   .obsidian/                      Vault นี้เปิด/แก้ไขด้วย Obsidian — Markdown + wikilink คือรูปแบบหลักของพื้นที่นี้เช่นกัน
 ```
 
@@ -89,6 +92,28 @@ docs/
 
 `.gitignore` ของ repo นี้กัน `reference/` และไฟล์กลุ่มข้างต้นไว้แล้ว — **ห้ามแก้ `.gitignore` ให้ปล่อยไฟล์เหล่านี้ผ่าน**
 
+## งานส่งย่อยที่มีโค้ดจริง (`Submission-RAISE-M2-HW1/`)
+
+โฟลเดอร์นี้คือ workspace แยกสำหรับการบ้าน Module 2 — **ไม่ใช่ส่วนหนึ่งของ SDLC vault ใน `docs/`** ขอบเขตของงานชิ้นนี้ถูกตัดมาจากภาพรวมระบบเต็มและล็อกไว้ที่ [`SCOPE.md`](SCOPE.md) (root ของ repo): ทำเฉพาะวงจร **สร้างสูตร (Formula) → เก็บ Firestore → ส่งตรวจ (submitted) → อนุมัติ/ตีกลับ (approved/rejected)** โดยบทบาท Perfumer กับ QC Reviewer เดิมเป็นการบ้านที่ 1 (Memory — read-only), ปัจจุบันต่อยอดเป็นการบ้านที่ 2 (สัปดาห์ 7 — Auth/CRUD/ACL/Hosting) แล้ว โดยใช้โฟลเดอร์เดิมต่อเนื่องกันเพราะเป็น Firebase project เดียวกัน
+
+**Firestore collections และสถานะทั้งหมด (ตามที่โจทย์สัปดาห์ 7 กำหนดให้ระบุไว้ตรงนี้):**
+- `formulas` (หลัก) — ฟิลด์สำคัญ: `perfumerId` (Auth UID เจ้าของ), `perfumerName`, `fragranceTypeId`/`fragranceTypeName`, `brief`, `status`, `createdAt`
+- `formulas/{id}/ingredients` (sub-collection) — `materialName`, `percent`
+- `fragranceTypes` (lookup, read-only จาก client) — `name`, `concentrationRange`
+- `users` — `email`, `displayName`, `role` (ดู [`ACL.md`](ACL.md))
+- **สถานะที่เป็นไปได้ทั้งหมดของ `formulas.status` มีแค่ 4 ค่า:** `draft` → `submitted` → `approved` หรือ `rejected` (ห้ามมีค่าอื่นนอกจากนี้)
+- **บทบาทที่เป็นไปได้ทั้งหมดของ `users.role` มีแค่ 2 ค่า:** `perfumer` (default ตอนสมัคร) และ `qc_reviewer` (ตั้งด้วยมือใน Console เท่านั้น)
+
+- `Submission-RAISE-M2-HW1/prototype/` — โปรเจกต์ Node เล็กๆ ที่มีโค้ดจริง ต่อ Firebase (Firestore + Auth) โปรเจกต์ `sattasarasada-perfume`:
+  - `npm install && npm run seed` — รัน `seed.js` เพื่อ seed ข้อมูลตัวอย่าง 5 `formulas` + 3 `fragranceTypes` (พร้อม `ingredients` เป็น sub-collection ต่อสูตร) ข้อมูลทั้งหมดเป็นข้อมูลสมมติเพื่อสาธิต UI เท่านั้น — สูตรที่ seed ไว้ใช้ `perfumerId` สมมติ (ไม่ใช่ Auth UID จริง) จึงใช้สาธิตได้แค่มุมมอง QC Reviewer เท่านั้น ไม่ใช่ CRUD ของบัญชีจริง
+  - `public/` — โฟลเดอร์ที่ deploy ขึ้น Firebase Hosting จริง (ตั้งค่าใน `firebase.json`) มี 5 หน้า: `login.html`, `signup.html` (สมัครแล้วได้ `role:"perfumer"` เสมอ, เขียนลง `users/{uid}`), `index.html` (list — filter ตาม role: perfumer เห็นแค่ของตัวเอง, qc_reviewer เห็นทุกสูตร), `formula-new.html` (ฟอร์มสร้างสูตร+วัตถุดิบ), `formula-detail.html` (ปุ่ม ส่งตรวจ/อนุมัติ/ตีกลับ/ลบ ตาม role+status) — ทุกหน้าใช้ `firebase-config.js` ร่วมกัน (ES module เดียว export `auth`/`db`) และการ์ด `onAuthStateChanged` เพื่อ redirect ไป `login.html` ถ้ายังไม่ login
+  - `firestore.rules` — บังคับสิทธิ์จริงตาม [`ACL.md`](../../ACL.md) (root ของ repo): ต้อง login ทุก read/write, perfumer เห็น/แก้/ลบได้แค่สูตรตัวเองตอน `draft`, QC เปลี่ยนได้แค่ฟิลด์ `status` ของสูตรที่ `submitted` แล้ว, ห้ามเปลี่ยน `role` ของตัวเอง (กันโปรโมทตัวเองเป็น QC) — deploy คู่กับ hosting ด้วย `firebase deploy --only hosting,firestore:rules`
+  - `firebase.json`/`.firebaserc` — คอนฟิก Firebase CLI (ชี้ `public/` เป็น hosting root, project id `sattasarasada-perfume`) ไม่มี secret ใดๆ ปลอดภัยที่จะ commit
+  - ไม่มี lint/test ในโฟลเดอร์นี้ — เป็นการบ้านสาธิตเชื่อมต่อฐานข้อมูล/auth/deploy เท่านั้น
+- `firebaseConfig` ที่ hardcode ใน `seed.js`/`public/firebase-config.js` เป็น Firebase **client config** (ตั้งใจเป็น public ได้ ไม่ใช่ secret) — ความปลอดภัยจริงมาจาก `firestore.rules` ไม่ใช่การซ่อนค่านี้ — **ห้ามใส่ข้อมูลจริงของบุคคลอื่นลงไปเด็ดขาด** ใช้ข้อมูลสมมติเท่านั้น
+- `docs/06-module2-homework/` — โฟลเดอร์รับหลักฐานส่งงาน (เช่น screenshot Firebase Console ที่เห็นข้อมูลใน `formulas` อย่างน้อย 5 รายการ) เก็บไว้ที่นี่ตามที่ `docs/06-module2-homework/README.md` ระบุ ไม่ใช่ตำแหน่งลำดับ SDLC ปกติ (`00-`…`05-`) — อย่าย้าย/ลบโดยไม่ตรวจกับผู้ใช้ก่อน
+- `tools/build-submission.py` (รันจาก root ของ `Raise/`: `python tools/build-submission.py`, ต้อง `pip install markdown` ก่อน) — แปลง prototype + test docs ใน `docs/` ให้เป็นชุด HTML ส่งงาน RAISE W3 ไปไว้ที่ `../Submission-RAISE-W3/` (นอก repo โดยตั้งใจ ดู `.gitignore`) นี่คนละชุดกับ `Submission-RAISE-M2-HW1/`
+
 ## เครื่องมืออัตโนมัติดูแลความสอดคล้องของเอกสาร (agents & skills)
 
 โปรเจกต์นี้มี custom agents ใน `.claude/agents/` และ skills ใน `.claude/skills/` สำหรับสร้าง/ตรวจสอบความสอดคล้องของเอกสารแต่ละชั้นให้ตรงกับชั้นก่อนหน้าเสมอ ตามลำดับ: spec → `backlog.md` → `feature-list.md`/`user-journey.md` → แตกแขนงขนานกัน 3 สาย (technical spec ใน `02-technical/`, test plan ใน `03-testing/`, prototype ใน `01-prototypes/`) → phase plan ใน `01-requirements/02-plan/`+`03-task/` เมื่อผู้ใช้ขอให้ทำงานที่ตรงกับหน้าที่ของ skill ใดอยู่แล้ว **ให้เรียกใช้ skill/agent นั้นแทนการแก้ไฟล์เอกสารตรงๆ เอง** เพื่อให้การตรวจสอบ cross-file consistency และการบันทึกสรุปงานลง `docs/05-log/{YYYYMMDD}-log.md` เป็นไปตามรูปแบบเดิมของโปรเจกต์
@@ -104,4 +129,4 @@ docs/
 - ให้ยึดเอกสารทั้งหมดใน `docs/01-requirements/01-spec/` (ไม่ใช่ไฟล์ใดไฟล์หนึ่งโดยเฉพาะ) เป็นแหล่งอ้างอิงหลักของความต้องการเชิงฟังก์ชัน/ไม่ใช่เชิงฟังก์ชัน (รหัส FR-xx / NFR-xx) — ใช้รหัสเหล่านี้อ้างอิงเมื่อพูดคุยหรือวางแผนฟีเจอร์ และให้ตรวจ `docs/01-requirements/backlog.md` เพื่อดูสรุป FR/NFR ล่าสุดทั้งหมดก่อนเสมอ
 - เอกสารออกแบบเชิงเทคนิคใน `docs/02-design/02-technical/` (`architecture.md`, `api-spec.md`, `db-spec.md`, `technology-stack.md` และไฟล์ใน `detailed-design/`) หากยังไม่มีไฟล์หรือยังว่างเปล่า หากถูกขอให้ช่วยออกแบบระบบ ให้สร้าง/เติมเนื้อหาลงในไฟล์เหล่านี้ตามตำแหน่งที่ระบุไว้ในโครงสร้างด้านบน ไม่ควรสร้างเอกสารคู่ขนานแยกที่อื่น
 - `docs/02-design/DESIGN.md` คือแหล่งอ้างอิงหลัก (single source of truth) ของ Design System เชิงภาพ (สี, ตัวอักษร, ระยะห่าง, องค์ประกอบ UI, accessibility) — เมื่อสร้างหรือแก้ไข Prototype ใดๆ ใน `01-prototypes/` ให้ยึด token และกติกาใน `DESIGN.md` เสมอ ห้ามกำหนดสี/สไตล์ใหม่นอกเอกสารนี้โดยไม่จำเป็น หากพบว่า Design System ต้องเปลี่ยน ให้แก้ที่ `DESIGN.md` ก่อน แล้วค่อยสะท้อนไปยัง Prototype
-- ยังไม่มี package manifest, โครงสร้างซอร์สโค้ด หรือ CI config ใดๆ เมื่อเริ่มพัฒนาจริงแล้ว ควรกลับมาอัปเดตไฟล์นี้ให้มีคำสั่ง build/lint/test และสถาปัตยกรรมโค้ดจริง
+- ระบบเต็ม (`docs/` vault) ยังไม่มี package manifest, โครงสร้างซอร์สโค้ด หรือ CI config ใดๆ เมื่อเริ่มพัฒนาจริงแล้ว ควรกลับมาอัปเดตไฟล์นี้ให้มีคำสั่ง build/lint/test และสถาปัตยกรรมโค้ดจริง (ซอร์สโค้ดเล็กๆ ที่มีอยู่ตอนนี้ใน `Submission-RAISE-M2-HW1/` เป็นการบ้านคนละขอบเขต ดูหัวข้อด้านบน)

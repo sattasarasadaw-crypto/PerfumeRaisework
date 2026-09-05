@@ -1,0 +1,76 @@
+rules_version = '2';
+
+// Formula Review (Module 2 HW2) — สิทธิ์ตาม ACL.md (repo root)
+// บทบาท: perfumer (default) / qc_reviewer (ตั้งค่าด้วยมือใน Firebase Console เท่านั้น)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isQc() {
+      return isSignedIn() && myRole() == 'qc_reviewer';
+    }
+
+    // บัญชีผู้ใช้ + บทบาท — เขียนได้เฉพาะเจ้าของ uid และห้ามเปลี่ยน role ของตัวเอง
+    // (ป้องกัน Perfumer โปรโมทตัวเองเป็น QC Reviewer แล้วอนุมัติสูตรตัวเอง)
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isSignedIn() && request.auth.uid == uid
+                    && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    // ตารางประเภทน้ำหอม — seed ไว้ล่วงหน้าเท่านั้น อ่านได้ทุกคนที่ login แล้ว เขียนไม่ได้จาก client
+    match /fragranceTypes/{typeId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /formulas/{formulaId} {
+      allow read: if isSignedIn()
+                  && (isQc() || resource.data.perfumerId == request.auth.uid);
+
+      allow create: if isSignedIn()
+                    && request.resource.data.perfumerId == request.auth.uid
+                    && request.resource.data.status == 'draft';
+
+      // เจ้าของแก้ไข/ส่งตรวจสูตรของตัวเองได้ขณะยังเป็น draft (ห้ามเปลี่ยน perfumerId, สถานะไปได้แค่ draft->submitted)
+      // หรือ QC Reviewer เปลี่ยนได้เฉพาะฟิลด์ status ของสูตรที่ submitted แล้ว ไปเป็น approved/rejected เท่านั้น
+      allow update: if isSignedIn() && (
+        (resource.data.perfumerId == request.auth.uid
+          && resource.data.status == 'draft'
+          && request.resource.data.perfumerId == resource.data.perfumerId
+          && request.resource.data.status in ['draft', 'submitted'])
+        ||
+        (isQc()
+          && resource.data.status == 'submitted'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+          && request.resource.data.status in ['approved', 'rejected'])
+      );
+
+      allow delete: if isSignedIn()
+                    && resource.data.perfumerId == request.auth.uid
+                    && resource.data.status == 'draft';
+
+      match /ingredients/{ingredientId} {
+        allow read: if isSignedIn()
+                    && (isQc()
+                        || get(/databases/$(database)/documents/formulas/$(formulaId)).data.perfumerId == request.auth.uid);
+
+        allow create: if isSignedIn()
+                      && get(/databases/$(database)/documents/formulas/$(formulaId)).data.perfumerId == request.auth.uid
+                      && get(/databases/$(database)/documents/formulas/$(formulaId)).data.status == 'draft';
+
+        // วัตถุดิบคงที่หลังบันทึก — ไม่มี use case แก้ไข/ลบรายตัวใน MVP นี้
+        allow update, delete: if false;
+      }
+    }
+  }
+}

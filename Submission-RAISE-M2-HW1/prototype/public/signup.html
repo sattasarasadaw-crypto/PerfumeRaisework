@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>สมัครสมาชิก — Formula Review</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; max-width: 420px; margin: 80px auto; padding: 0 16px; background: #faf8f5; color: #2b2320; }
+  h1 { font-size: 1.3rem; }
+  form { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  label { display: block; font-size: 0.85rem; margin: 12px 0 4px; }
+  input { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box; }
+  button { margin-top: 18px; width: 100%; padding: 10px; background: #8a6800; color: #fff; border: none; border-radius: 4px; font-size: 0.95rem; cursor: pointer; }
+  button:hover { background: #6b5100; }
+  .hint { color: #6b6259; font-size: 0.85rem; margin-top: 14px; text-align: center; }
+  .note { color: #6b6259; font-size: 0.8rem; margin-top: 10px; }
+  #error { color: #a31c1c; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+  <h1>🧪 สมัครสมาชิก (นักปรุงน้ำหอม)</h1>
+  <form id="signupForm">
+    <label for="displayName">ชื่อที่แสดง</label>
+    <input type="text" id="displayName" required autocomplete="name" />
+    <label for="email">อีเมล</label>
+    <input type="email" id="email" required autocomplete="username" />
+    <label for="password">รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label>
+    <input type="password" id="password" required minlength="6" autocomplete="new-password" />
+    <div id="error"></div>
+    <button type="submit">สมัครสมาชิก</button>
+  </form>
+  <p class="note">บัญชีใหม่ทุกบัญชีเริ่มต้นเป็นบทบาท <strong>นักปรุงน้ำหอม (Perfumer)</strong> เสมอ — การเปลี่ยนเป็น QC Reviewer ต้องให้ผู้ดูแลระบบแก้ค่า <code>role</code> ใน Firebase Console เท่านั้น (ดู <code>ACL.md</code>)</p>
+  <p class="hint">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { doc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const form = document.getElementById("signupForm");
+    const errorEl = document.getElementById("error");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.textContent = "";
+      const displayName = document.getElementById("displayName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", cred.user.uid), {
+          email,
+          displayName,
+          role: "perfumer",
+          createdAt: Timestamp.now(),
+        });
+        window.location.href = "index.html";
+      } catch (err) {
+        errorEl.textContent = "สมัครสมาชิกไม่สำเร็จ: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

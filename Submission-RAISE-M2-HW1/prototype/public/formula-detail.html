@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>รายละเอียดสูตร — Formula Review</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; background: #faf8f5; color: #2b2320; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  h1 { font-size: 1.3rem; margin: 0; }
+  a.back { font-size: 0.85rem; color: #8a6800; }
+  .card { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .field { margin-bottom: 14px; }
+  .field .label { font-size: 0.78rem; color: #888; text-transform: uppercase; letter-spacing: .03em; }
+  .field .value { font-size: 1rem; }
+  .badge { padding: 2px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; }
+  .draft { background: #e8e8e8; color: #555; }
+  .submitted { background: #fff3cd; color: #8a6800; }
+  .approved { background: #d7f5df; color: #1a7a3a; }
+  .rejected { background: #fddede; color: #a31c1c; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+  .actions { margin-top: 20px; display: flex; gap: 10px; }
+  button { padding: 9px 16px; border: none; border-radius: 4px; font-size: 0.9rem; cursor: pointer; }
+  .btn-submit { background: #8a6800; color: #fff; }
+  .btn-approve { background: #1a7a3a; color: #fff; }
+  .btn-reject { background: #a31c1c; color: #fff; }
+  .btn-delete { background: none; color: #a31c1c; border: 1px solid #a31c1c; }
+  #error { color: #a31c1c; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🧪 รายละเอียดสูตร</h1>
+    <a class="back" href="index.html">&larr; กลับรายการ</a>
+  </header>
+
+  <div class="card" id="card">กำลังโหลด...</div>
+  <div id="error"></div>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { doc, getDoc, updateDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const cardEl = document.getElementById("card");
+    const errorEl = document.getElementById("error");
+    const formulaId = new URLSearchParams(window.location.search).get("id");
+
+    if (!formulaId) {
+      cardEl.textContent = "ไม่พบรหัสสูตร";
+    }
+
+    async function loadAndRender(user, role) {
+      const formulaRef = doc(db, "formulas", formulaId);
+      const snap = await getDoc(formulaRef);
+      if (!snap.exists()) {
+        cardEl.textContent = "ไม่พบสูตรนี้ (หรือไม่มีสิทธิ์เข้าถึง)";
+        return;
+      }
+      const f = snap.data();
+      const ingSnap = await getDocs(collection(formulaRef, "ingredients"));
+      const ingredientsHtml = [...ingSnap.docs]
+        .map((d) => `<tr><td>${d.data().materialName}</td><td>${d.data().percent}%</td></tr>`)
+        .join("");
+
+      const isOwner = f.perfumerId === user.uid;
+      const isQc = role === "qc_reviewer";
+      const canSubmit = isOwner && f.status === "draft";
+      const canDelete = isOwner && f.status === "draft";
+      const canReview = isQc && f.status === "submitted";
+
+      cardEl.innerHTML = `
+        <div class="field"><div class="label">ชื่อสูตร</div><div class="value">${f.name ?? "-"}</div></div>
+        <div class="field"><div class="label">ประเภท</div><div class="value">${f.fragranceTypeName ?? "-"}</div></div>
+        <div class="field"><div class="label">นักปรุง</div><div class="value">${f.perfumerName ?? "-"}</div></div>
+        <div class="field"><div class="label">สถานะ</div><div class="value"><span class="badge ${f.status}">${f.status}</span></div></div>
+        <div class="field"><div class="label">โจทย์ (brief)</div><div class="value">${f.brief ?? "-"}</div></div>
+        <div class="field">
+          <div class="label">วัตถุดิบ</div>
+          <table><thead><tr><th>ชื่อ</th><th>%</th></tr></thead><tbody>${ingredientsHtml || "<tr><td colspan=2>ไม่มีข้อมูล</td></tr>"}</tbody></table>
+        </div>
+        <div class="actions">
+          ${canSubmit ? '<button class="btn-submit" id="submitBtn">ส่งตรวจ (submit)</button>' : ""}
+          ${canReview ? '<button class="btn-approve" id="approveBtn">อนุมัติ (approve)</button>' : ""}
+          ${canReview ? '<button class="btn-reject" id="rejectBtn">ตีกลับ (reject)</button>' : ""}
+          ${canDelete ? '<button class="btn-delete" id="deleteBtn">ลบ</button>' : ""}
+        </div>
+      `;
+
+      document.getElementById("submitBtn")?.addEventListener("click", async () => {
+        await updateDoc(formulaRef, { status: "submitted" });
+        loadAndRender(user, role);
+      });
+      document.getElementById("approveBtn")?.addEventListener("click", async () => {
+        await updateDoc(formulaRef, { status: "approved" });
+        loadAndRender(user, role);
+      });
+      document.getElementById("rejectBtn")?.addEventListener("click", async () => {
+        await updateDoc(formulaRef, { status: "rejected" });
+        loadAndRender(user, role);
+      });
+      document.getElementById("deleteBtn")?.addEventListener("click", async () => {
+        if (!confirm(`ยืนยันลบสูตร "${f.name}"? การลบนี้ย้อนกลับไม่ได้`)) return;
+        await deleteDoc(formulaRef);
+        window.location.href = "index.html";
+      });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const role = userDoc.exists() ? userDoc.data().role : "perfumer";
+      try {
+        await loadAndRender(user, role);
+      } catch (err) {
+        errorEl.textContent = "โหลด/แก้ไขข้อมูลไม่สำเร็จ: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

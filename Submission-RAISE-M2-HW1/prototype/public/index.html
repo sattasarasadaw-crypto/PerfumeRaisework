@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>รายการสูตรน้ำหอม — Formula Review</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; max-width: 900px; margin: 40px auto; padding: 0 16px; background: #faf8f5; color: #2b2320; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  h1 { font-size: 1.4rem; margin: 0; }
+  .user-bar { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #555; }
+  .role-badge { padding: 2px 8px; border-radius: 999px; background: #eee7d8; font-weight: 600; }
+  button.link { background: none; border: none; color: #8a6800; text-decoration: underline; cursor: pointer; font-size: 0.85rem; padding: 0; }
+  .hint { color: #6b6259; font-size: 0.9rem; margin-bottom: 16px; }
+  .actions { margin-bottom: 16px; }
+  .btn { display: inline-block; padding: 8px 16px; background: #8a6800; color: #fff; border-radius: 4px; text-decoration: none; font-size: 0.9rem; }
+  table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 0.92rem; }
+  th { background: #f1ece4; }
+  tr.row-link { cursor: pointer; }
+  tr.row-link:hover { background: #faf5ea; }
+  .badge { padding: 2px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+  .draft { background: #e8e8e8; color: #555; }
+  .submitted { background: #fff3cd; color: #8a6800; }
+  .approved { background: #d7f5df; color: #1a7a3a; }
+  .rejected { background: #fddede; color: #a31c1c; }
+  #status { font-size: 0.85rem; color: #999; margin-top: 12px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🧪 รายการสูตรน้ำหอม</h1>
+    <div class="user-bar">
+      <span id="whoami">กำลังโหลด...</span>
+      <button class="link" id="logoutBtn">ออกจากระบบ</button>
+    </div>
+  </header>
+  <p class="hint" id="scopeHint"></p>
+
+  <div class="actions">
+    <a class="btn" id="newBtn" href="formula-new.html" hidden>+ สร้างสูตรใหม่</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ชื่อสูตร</th>
+        <th>ประเภท</th>
+        <th>นักปรุง</th>
+        <th>สถานะ</th>
+        <th>โจทย์ (brief)</th>
+      </tr>
+    </thead>
+    <tbody id="rows">
+      <tr><td colspan="5">กำลังโหลด...</td></tr>
+    </tbody>
+  </table>
+  <div id="status"></div>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const rowsEl = document.getElementById("rows");
+    const statusEl = document.getElementById("status");
+    const whoamiEl = document.getElementById("whoami");
+    const scopeHintEl = document.getElementById("scopeHint");
+    const newBtn = document.getElementById("newBtn");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const role = userDoc.exists() ? userDoc.data().role : "perfumer";
+      whoamiEl.textContent = `${user.email} (${role === "qc_reviewer" ? "QC Reviewer" : "Perfumer"})`;
+
+      let formulasQuery;
+      if (role === "qc_reviewer") {
+        scopeHintEl.textContent = "มุมมอง QC Reviewer — เห็นสูตรทุกคนเพื่อตรวจสอบ";
+        formulasQuery = collection(db, "formulas");
+      } else {
+        scopeHintEl.textContent = "มุมมอง Perfumer — เห็นเฉพาะสูตรของตัวเอง";
+        newBtn.hidden = false;
+        formulasQuery = query(collection(db, "formulas"), where("perfumerId", "==", user.uid));
+      }
+
+      onSnapshot(
+        formulasQuery,
+        (snapshot) => {
+          if (snapshot.empty) {
+            rowsEl.innerHTML = `<tr><td colspan="5">ยังไม่มีข้อมูล</td></tr>`;
+            return;
+          }
+          rowsEl.innerHTML = "";
+          snapshot.forEach((docSnap) => {
+            const f = docSnap.data();
+            const tr = document.createElement("tr");
+            tr.className = "row-link";
+            tr.innerHTML = `
+              <td>${f.name ?? "-"}</td>
+              <td>${f.fragranceTypeName ?? "-"}</td>
+              <td>${f.perfumerName ?? "-"}</td>
+              <td><span class="badge ${f.status}">${f.status ?? "-"}</span></td>
+              <td>${f.brief ?? "-"}</td>
+            `;
+            tr.addEventListener("click", () => {
+              window.location.href = `formula-detail.html?id=${docSnap.id}`;
+            });
+            rowsEl.appendChild(tr);
+          });
+          statusEl.textContent = `อัปเดตล่าสุด: ${new Date().toLocaleTimeString("th-TH")} (${snapshot.size} รายการ)`;
+        },
+        (err) => {
+          rowsEl.innerHTML = `<tr><td colspan="5">โหลดข้อมูลไม่สำเร็จ: ${err.message}</td></tr>`;
+        }
+      );
+    });
+  </script>
+</body>
+</html>

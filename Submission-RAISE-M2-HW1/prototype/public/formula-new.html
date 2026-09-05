@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>สร้างสูตรใหม่ — Formula Review</title>
+<style>
+  body { font-family: "Segoe UI", Tahoma, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; background: #faf8f5; color: #2b2320; }
+  header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  h1 { font-size: 1.3rem; margin: 0; }
+  a.back { font-size: 0.85rem; color: #8a6800; }
+  form { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  label { display: block; font-size: 0.85rem; margin: 14px 0 4px; }
+  input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.95rem; box-sizing: border-box; font-family: inherit; }
+  textarea { resize: vertical; min-height: 60px; }
+  .ing-row { display: grid; grid-template-columns: 1fr 100px 32px; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .ing-row input { margin: 0; }
+  .remove-ing { background: none; border: none; color: #a31c1c; cursor: pointer; font-size: 1.1rem; }
+  #addIngBtn { margin-top: 4px; background: none; border: 1px dashed #bbb; color: #555; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+  button[type="submit"] { margin-top: 20px; width: 100%; padding: 10px; background: #8a6800; color: #fff; border: none; border-radius: 4px; font-size: 0.95rem; cursor: pointer; }
+  button[type="submit"]:hover { background: #6b5100; }
+  #error { color: #a31c1c; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🧪 สร้างสูตรใหม่</h1>
+    <a class="back" href="index.html">&larr; กลับรายการ</a>
+  </header>
+
+  <form id="formulaForm">
+    <label for="name">ชื่อสูตร</label>
+    <input type="text" id="name" required />
+
+    <label for="fragranceType">ประเภทน้ำหอม</label>
+    <select id="fragranceType" required>
+      <option value="">กำลังโหลด...</option>
+    </select>
+
+    <label for="brief">โจทย์ (brief) — ลูกค้าต้องการอะไร</label>
+    <textarea id="brief" required></textarea>
+
+    <label>วัตถุดิบ (ingredients)</label>
+    <div id="ingredients"></div>
+    <button type="button" id="addIngBtn">+ เพิ่มวัตถุดิบ</button>
+
+    <div id="error"></div>
+    <button type="submit">บันทึกเป็นร่าง (draft)</button>
+  </form>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { doc, getDoc, collection, getDocs, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const fragranceTypeEl = document.getElementById("fragranceType");
+    const ingredientsEl = document.getElementById("ingredients");
+    const errorEl = document.getElementById("error");
+    let currentUser = null;
+    let currentDisplayName = "";
+
+    function addIngredientRow(materialName = "", percent = "") {
+      const row = document.createElement("div");
+      row.className = "ing-row";
+      row.innerHTML = `
+        <input type="text" placeholder="ชื่อวัตถุดิบ" class="ing-name" value="${materialName}" required />
+        <input type="number" placeholder="%" class="ing-percent" min="0" max="100" step="0.1" value="${percent}" required />
+        <button type="button" class="remove-ing" title="ลบแถวนี้">×</button>
+      `;
+      row.querySelector(".remove-ing").addEventListener("click", () => row.remove());
+      ingredientsEl.appendChild(row);
+    }
+    document.getElementById("addIngBtn").addEventListener("click", () => addIngredientRow());
+    addIngredientRow();
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+      currentUser = user;
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      currentDisplayName = userDoc.exists() ? (userDoc.data().displayName || user.email) : user.email;
+
+      const typesSnap = await getDocs(collection(db, "fragranceTypes"));
+      fragranceTypeEl.innerHTML = "";
+      typesSnap.forEach((docSnap) => {
+        const t = docSnap.data();
+        const opt = document.createElement("option");
+        opt.value = docSnap.id;
+        opt.textContent = `${t.name} (${t.concentrationRange})`;
+        opt.dataset.name = t.name;
+        fragranceTypeEl.appendChild(opt);
+      });
+    });
+
+    document.getElementById("formulaForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.textContent = "";
+
+      const ingredientRows = [...ingredientsEl.querySelectorAll(".ing-row")].map((row) => ({
+        materialName: row.querySelector(".ing-name").value.trim(),
+        percent: parseFloat(row.querySelector(".ing-percent").value),
+      }));
+      if (ingredientRows.length === 0) {
+        errorEl.textContent = "ต้องมีวัตถุดิบอย่างน้อย 1 รายการ";
+        return;
+      }
+
+      const selectedType = fragranceTypeEl.selectedOptions[0];
+      try {
+        const formulaRef = await addDoc(collection(db, "formulas"), {
+          name: document.getElementById("name").value.trim(),
+          perfumerId: currentUser.uid,
+          perfumerName: currentDisplayName,
+          fragranceTypeId: selectedType.value,
+          fragranceTypeName: selectedType.dataset.name,
+          brief: document.getElementById("brief").value.trim(),
+          status: "draft",
+          createdAt: Timestamp.now(),
+        });
+        for (const ing of ingredientRows) {
+          await addDoc(collection(formulaRef, "ingredients"), ing);
+        }
+        window.location.href = "index.html";
+      } catch (err) {
+        errorEl.textContent = "บันทึกไม่สำเร็จ: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

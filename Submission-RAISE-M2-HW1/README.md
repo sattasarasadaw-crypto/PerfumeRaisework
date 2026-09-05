@@ -14,7 +14,7 @@
 - [x] โค้ดระบบ พร้อม commit ในชื่อคุณ **อย่างน้อย 3 ครั้ง** — ทำแล้ว (3 commits, author "สัตตสรษดา วงศ์เพชรมณีโชติ") และ push ขึ้น GitHub แล้ว
 - [x] `SCOPE.md` ที่ root ของ repo — ทำไว้แล้ว ([`../SCOPE.md`](../SCOPE.md))
 - [ ] ภาพหน้า Firebase Console ที่เห็นข้อมูลตัวอย่าง ≥5 รายการ — **เก็บไฟล์ต้นฉบับไว้ที่ [`screenshots/`](screenshots/) ในโฟลเดอร์นี้** แล้วมีสำเนาชุดเดียวกันไปวางไว้ที่ `../docs/06-module2-homework/` ด้วย (จุดที่ผู้สอนน่าจะเปิดเช็ค เพราะโจทย์ระบุ "โฟลเดอร์ docs/")
-- [x] หน้ารายการที่อ่านข้อมูลจริงจาก Firestore — [`prototype/index.html`](prototype/index.html) ทดสอบแล้ว อ่าน/อัปเดตสดจาก Firestore ได้จริง (real-time, ไม่ต้องรอ F5 ด้วยซ้ำ)
+- [x] หน้ารายการที่อ่านข้อมูลจริงจาก Firestore — ทดสอบแล้ว อ่าน/อัปเดตสดจาก Firestore ได้จริง (real-time, ไม่ต้องรอ F5 ด้วยซ้ำ) — เดิมอยู่ที่ `prototype/index.html` ตอนส่งงานนี้ (2026-09-01) ต่อมาย้ายเป็น [`prototype/public/index.html`](prototype/public/index.html) ตอนทำการบ้านที่ 2 (เพิ่ม auth) — ดู [`../Submission-RAISE-M2-HW2/`](../Submission-RAISE-M2-HW2/)
 
 ## สิ่งที่ต้องมี "ก่อน" ลงมือเขียนโค้ด
 

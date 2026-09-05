@@ -33,6 +33,10 @@ const fragranceTypes = [
 
 // โฟลเดอร์หลัก (formulas) — 5 รายการ ข้อมูลสมมติทั้งหมดเพื่อสาธิต UI เท่านั้น
 // แต่ละรายการมี ingredients เป็นโฟลเดอร์ย่อยของตัวเอง (item-specific data)
+// หมายเหตุ (Week 7 HW2): perfumerId ด้านล่างเป็นสตริงสมมติ ไม่ใช่ Firebase Auth UID จริง
+// จึงจะไม่โผล่ในมุมมอง "สูตรของฉัน" ของบัญชี Perfumer จริง และแก้ไข/ลบไม่ได้ตาม firestore.rules
+// (เพราะ perfumerId ไม่ตรงกับ request.auth.uid ของใคร) — ใช้ข้อมูลชุดนี้เพื่อสาธิตมุมมอง QC Reviewer
+// (เห็นได้ทุกสูตร) เท่านั้น ส่วนการสาธิต CRUD/persistence จริงให้สมัครบัญชีทดสอบผ่าน public/signup.html แทน
 const formulas = [
   {
     name: "Citrus Morning Draft",
