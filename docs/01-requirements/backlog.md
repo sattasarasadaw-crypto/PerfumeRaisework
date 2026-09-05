@@ -1,8 +1,8 @@
 # Product Backlog — AI Perfumery Formulation Assistant
 
 - **อัปเดตล่าสุด:** 2026-08-18
-- **แหล่งที่มา (Single Source of Truth):** [[01-spec/20260818-01-ai-perfumery-core|20260818-01-ai-perfumery-core]]
-- **สรุป:** FR ทั้งหมด **39 ข้อ** (สูง 22 / กลาง 12 / ต่ำ 5) · NFR ทั้งหมด **15 ข้อ** (สูง 10 / กลาง 5)
+- **แหล่งที่มา (Single Source of Truth):** [[01-spec/20260818-01-ai-perfumery-core|20260818-01-ai-perfumery-core]] · [[01-spec/20260818-02-prohibited-substance-blocking|20260818-02-prohibited-substance-blocking]] · [[01-spec/20260818-03-formulation-manager-role|20260818-03-formulation-manager-role]]
+- **สรุป:** FR ทั้งหมด **42 ข้อ** (สูง 24 / กลาง 13 / ต่ำ 5) · NFR ทั้งหมด **15 ข้อ** (สูง 10 / กลาง 5 — ดูหมายเหตุ NFR-09 ด้านล่าง มีข้อเสนอแก้ไขถ้อยคำรอ NFR review)
 
 > Backlog นี้เรียงตาม **ลำดับความสำคัญ** (สูง → กลาง → ต่ำ) ตามหลัก Product Backlog ของ Scrum
 > ระดับ **สูง** = ต้องมีใน MVP · **กลาง** = เพิ่มคุณค่ามาก · **ต่ำ** = nice-to-have
@@ -14,6 +14,8 @@
 | วันที่ | เลขที่เอกสาร | เรื่อง | Spec | สถานะ |
 |---|---|---|---|---|
 | 2026-08-18 | 20260818-01 | ระบบผู้ช่วยปรุงน้ำหอมด้วย AI (ภาพรวมทั้งระบบ) | [[01-spec/20260818-01-ai-perfumery-core\|spec]] | Draft |
+| 2026-08-18 | 20260818-02 | บล็อก/เตือนสารต้องห้าม (IFRA PROHIBITION) ตั้งแต่จุดค้นหา/เลือกสาร | [[01-spec/20260818-02-prohibited-substance-blocking\|spec]] | Draft |
+| 2026-08-18 | 20260818-03 | มุมมองข้ามสูตรสำหรับบทบาท Formulation Manager | [[01-spec/20260818-03-formulation-manager-role\|spec]] | Draft |
 
 ---
 
@@ -48,30 +50,33 @@
 | 23 | FR-37 | เข้าสู่ระบบด้วยบัญชีผู้ใช้ | Account | ยังไม่เริ่ม |
 | 24 | FR-38 | บันทึก Audit Log ทุกการเข้าใช้/แก้ไข | Account | ยังไม่เริ่ม |
 | 25 | FR-39 | จัดการความยินยอม (Consent) ตาม PDPA | Account | ยังไม่เริ่ม |
+| 26 | FR-40 | แสดงสถานะสารต้องห้าม (PROHIBITION) ในผลค้นหา | Compliance | ยังไม่เริ่ม |
+| 27 | FR-41 | บล็อกการเพิ่มสารต้องห้ามเข้าสูตร ไม่มี override | Compliance | ยังไม่เริ่ม |
 
 ### 🟡 ลำดับที่ 2 — ระดับกลาง
 
 | ลำดับ | รหัส | ความต้องการ | กลุ่มงาน | สถานะ |
 |---|---|---|---|---|
-| 26 | FR-15 | Fine-tune ผลลัพธ์ด้วย Master Code รายสาร | Engine A | ยังไม่เริ่ม |
-| 27 | FR-24 | แนะนำช่วงสัดส่วนแก้ Muddy Accord | Compliance | ยังไม่เริ่ม |
-| 28 | FR-25 | เตือน Scent Drift เมื่อเบี่ยงจากบรีฟตั้งต้น | Compliance | ยังไม่เริ่ม |
-| 29 | FR-28 | กราฟน้ำหนัก Micro-Cluster | Dashboard | ยังไม่เริ่ม |
-| 30 | FR-29 | Command Bar ถามเจาะลึกข้อมูล | Dashboard | ยังไม่เริ่ม |
-| 31 | FR-31 | What-If: สลับสารแล้วคำนวณเฉพาะ Diff | What-If | ยังไม่เริ่ม |
-| 32 | FR-32 | Diff View เทียบสูตรเดิม vs สูตรใหม่ | What-If | ยังไม่เริ่ม |
-| 33 | FR-33 | Member List + ไฮไลต์สารที่อยู่ในบรีฟ | Distinctiveness | ยังไม่เริ่ม |
-| 34 | FR-34 | Distinctiveness Card ต่อสาร | Distinctiveness | ยังไม่เริ่ม |
-| 35 | FR-36 | คำนวณต้นทุนวัตถุดิบต่อกิโลกรัม | Cost | ยังไม่เริ่ม |
-| 36 | FR-05 | ประวัติเวอร์ชันของสูตร | Formula | ยังไม่เริ่ม |
+| 28 | FR-15 | Fine-tune ผลลัพธ์ด้วย Master Code รายสาร | Engine A | ยังไม่เริ่ม |
+| 29 | FR-24 | แนะนำช่วงสัดส่วนแก้ Muddy Accord | Compliance | ยังไม่เริ่ม |
+| 30 | FR-25 | เตือน Scent Drift เมื่อเบี่ยงจากบรีฟตั้งต้น | Compliance | ยังไม่เริ่ม |
+| 31 | FR-28 | กราฟน้ำหนัก Micro-Cluster | Dashboard | ยังไม่เริ่ม |
+| 32 | FR-29 | Command Bar ถามเจาะลึกข้อมูล | Dashboard | ยังไม่เริ่ม |
+| 33 | FR-31 | What-If: สลับสารแล้วคำนวณเฉพาะ Diff | What-If | ยังไม่เริ่ม |
+| 34 | FR-32 | Diff View เทียบสูตรเดิม vs สูตรใหม่ | What-If | ยังไม่เริ่ม |
+| 35 | FR-33 | Member List + ไฮไลต์สารที่อยู่ในบรีฟ | Distinctiveness | ยังไม่เริ่ม |
+| 36 | FR-34 | Distinctiveness Card ต่อสาร | Distinctiveness | ยังไม่เริ่ม |
+| 37 | FR-36 | คำนวณต้นทุนวัตถุดิบต่อกิโลกรัม | Cost | ยังไม่เริ่ม |
+| 38 | FR-05 | ประวัติเวอร์ชันของสูตร | Formula | ยังไม่เริ่ม |
+| 39 | FR-42 | มุมมองภาพรวมหลายสูตรสำหรับ Formulation Manager (จำกัดในบัญชี/องค์กรเดียวกัน) | Formulation Manager | ยังไม่เริ่ม |
 
 ### 🟢 ลำดับที่ 3 — ระดับต่ำ
 
 | ลำดับ | รหัส | ความต้องการ | กลุ่มงาน | สถานะ |
 |---|---|---|---|---|
-| 37 | FR-06 | นำเข้าสูตรจากไฟล์ CSV/Excel | Formula | ยังไม่เริ่ม |
-| 38 | FR-30 | Export รายงาน PDF/CSV | Dashboard | ยังไม่เริ่ม |
-| 39 | FR-35 | คลังสารส่วนตัว (Private Registry) | Distinctiveness | ยังไม่เริ่ม |
+| 40 | FR-06 | นำเข้าสูตรจากไฟล์ CSV/Excel | Formula | ยังไม่เริ่ม |
+| 41 | FR-30 | Export รายงาน PDF/CSV | Dashboard | ยังไม่เริ่ม |
+| 42 | FR-35 | คลังสารส่วนตัว (Private Registry) | Distinctiveness | ยังไม่เริ่ม |
 
 ---
 
