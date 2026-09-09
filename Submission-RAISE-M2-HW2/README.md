@@ -16,10 +16,12 @@
 
 ส่ง **URL เดียว** ของ repo `Raise` (https://github.com/sattasarasadaw-crypto/PerfumeRaisework) โดย repo ต้องมีครบ:
 
+> **หมายเหตุ:** รายการ 4 ข้อด้านล่างคือสิ่งที่โจทย์ **w7-homework.html** (การบ้านจริงที่ต้องส่ง) ระบุไว้ตรงๆ — ส่วน checkpoint แบบ 4 ขั้นที่เคยเขียนไว้ในไฟล์นี้ก่อนหน้านี้มาจาก **w7-lab-leaveeasy.html** (แบบฝึกหัดในคาบ ไม่ใช่เกณฑ์ส่งงานจริง) เก็บไว้ในหัวข้อ "ทดสอบเพิ่มเติม (ไม่บังคับส่ง)" ด้านล่างแทน เพราะยังมีประโยชน์ในการยืนยันว่าระบบทำงานถูกต้อง
+
 - [x] Source code พร้อม `CLAUDE.md` ที่ไม่มี API key/secret หลุด (ดูหัวข้อ "งานส่งย่อยที่มีโค้ดจริง" ใน root `CLAUDE.md`)
 - [x] `README.md` (ไฟล์นี้) มี live URL แล้ว: https://sattasarasada-perfume.web.app
 - [x] `ACL.md` ที่ root ของ repo — ทำไว้แล้ว ([`../ACL.md`](../ACL.md))
-- [ ] Screenshot หลักฐานใน `docs/` (ดูรายการ checkpoint ด้านล่าง)
+- [x] ภาพใน `docs/` แสดง "หน้าต่างส่วนตัวที่เข้าไม่ได้ตอนไม่ login" — [`../../docs/06-module2-homework/w7-permission-denied-incognito.png`](../../docs/06-module2-homework/w7-permission-denied-incognito.png) (Incognito + URL bar + Console เห็น `403 Forbidden`/`permission-denied` ชัดเจน)
 
 ## ทำตามลำดับ
 
@@ -30,12 +32,15 @@
 | C | Auth (login/signup/logout, redirect ถ้าไม่ login, `perfumerId`=uid), ACL.md, Firestore Security Rules | ✅ ทดสอบจริงแล้ว — role flip เป็น `qc_reviewer` ใช้งานได้, perfumer/QC เห็นข้อมูลตาม scope ที่ถูกต้อง |
 | D | Deploy ขึ้น Firebase Hosting + Firestore Rules | ✅ deploy สำเร็จแล้ว — ยืนยัน `permission-denied` จริงตอนไม่ login และ live URL ใช้งานได้ |
 
-## สิ่งที่ต้องทำเองก่อนเริ่มทดสอบ
+## ทดสอบเพิ่มเติม (ไม่บังคับส่ง — มาจากแบบฝึกหัดในคาบ)
 
-1. **Firebase Console → Authentication** → เปิด provider **Email/Password** (ถ้ายังไม่เปิด)
-2. ทดสอบในเครื่อง: เปิด `../Submission-RAISE-M2-HW1/prototype/public/index.html` ด้วยเบราว์เซอร์ (ไม่ต้องมี server, เหมือน HW1) → ลองสมัคร/login/สร้างสูตร/ส่งตรวจ/ลบ → ปิดเบราว์เซอร์แล้วเปิดใหม่เพื่อพิสูจน์ persistence (Checkpoint B4)
-3. เข้า Firebase Console → Firestore → collection `users` → แก้ `role` ของบัญชีทดสอบที่ 2 เป็น `"qc_reviewer"` → login ด้วยบัญชีนั้นเพื่อทดสอบอนุมัติ/ตีกลับ (ดูขั้นตอนละเอียดใน [`../ACL.md`](../ACL.md))
-4. ลอง fetch/เปิดหน้าเว็บแบบไม่ login (หรือ Incognito) → ต้องเจอ `permission-denied` → เก็บภาพเป็น **Checkpoint C3**
+รายการนี้ไม่ใช่สิ่งที่โจทย์ w7-homework.html บังคับให้ส่ง แต่เป็นขั้นตอนตรวจสอบที่มีประโยชน์ (ได้ทำและยืนยันผ่านหมดแล้ว):
+
+1. Firebase Console → Authentication → เปิด provider Email/Password — ✅
+2. สมัคร/login/สร้างสูตร/ส่งตรวจ/ลบ → ปิดเบราว์เซอร์แล้วเปิดใหม่พิสูจน์ persistence — ✅ ทดสอบผ่านแล้ว
+3. flip `role` เป็น `qc_reviewer` ใน Firebase Console → login ทดสอบอนุมัติ/ตีกลับ — ✅ ทดสอบผ่านแล้ว
+4. เปิด Incognito แบบไม่ login → เจอ `permission-denied` — ✅ ยืนยันแล้ว (ภาพอยู่ใน `docs/06-module2-homework/`)
+5. ส่ง live URL ให้เพื่อนเปิดจากเครื่องอื่น (พิสูจน์ deploy ใช้งานได้จริงข้ามเครื่อง) — ยังไม่ได้ทำ (ไม่บังคับตามโจทย์การบ้าน)
 
 ## Deploy ขึ้น Firebase Hosting
 
@@ -47,13 +52,4 @@ firebase login
 firebase deploy --only hosting,firestore:rules
 ```
 
-`firebase login` จะเปิดเบราว์เซอร์ให้ login ด้วย Google account ของคุณเอง (ขั้นตอนนี้ต้องทำเองเท่านั้น) หลัง deploy สำเร็จจะได้ URL แบบ `https://sattasarasada-perfume.web.app` — เอา URL นี้มาใส่ในหัวข้อ "🔴 Live App" ด้านบน แล้วส่งให้เพื่อนลองเปิดเพื่อทดสอบ **Checkpoint D2** (เพื่อนต้อง login ก่อนถึงจะเห็นข้อมูล)
-
-## เช็กก่อนส่ง
-
-- [x] Checkpoint 1: repo มี `CLAUDE.md` ไม่มี API key ที่เป็นความลับหลุด (`firebaseConfig` เป็น client config เปิดเผยได้ ไม่ใช่ secret — ดูคำอธิบายใน `CLAUDE.md`)
-- [ ] Checkpoint 2: screenshot ก่อน/หลังปิดเบราว์เซอร์ พิสูจน์ข้อมูลยังอยู่ (ยืนยัน mechanism ทำงานถูกต้องแล้วผ่านการทดสอบอัตโนมัติ — เหลือแค่ถ่ายภาพ)
-- [ ] Checkpoint 3: screenshot เจอ `permission-denied` ตอนไม่ได้ login (ยืนยันแล้วว่า error เกิดขึ้นจริงหลัง deploy — เหลือแค่ถ่ายภาพ)
-- [ ] Checkpoint 4: screenshot เพื่อนเปิด live URL แล้วต้อง login ก่อน (URL พร้อมใช้แล้ว: https://sattasarasada-perfume.web.app — เหลือแค่ส่งให้เพื่อนเปิดจริง)
-- [ ] คำตอบ Google Classroom: บทบาทของระบบมีอะไรบ้าง และแต่ละบทบาททำอะไรไม่ได้ (สรุปจาก [`../ACL.md`](../ACL.md) ได้เลย)
-- [ ] ไม่มีข้อมูลจริงของบุคคลอื่นอยู่ในฐานข้อมูลเลย (ข้อมูลสมมติทั้งหมด)
+`firebase login` จะเปิดเบราว์เซอร์ให้ login ด้วย Google account ของคุณเอง (ขั้นตอนนี้ต้องทำเองเท่านั้น) หลัง deploy สำเร็จจะได้ URL แบบ `https://sattasarasada-perfume.web.app` — เอา URL นี้มาใส่ในหัวข้อ "🔴 Live App" ด้านบน (ทำไปแล้ว — ดูด้านบน)

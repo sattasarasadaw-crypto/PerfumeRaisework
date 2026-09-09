@@ -1,9 +1,8 @@
 # screenshots/
 
-วางไฟล์ภาพหลักฐาน 4 Checkpoint ของสัปดาห์ที่ 7 ไว้ที่นี่ (ดูรายการเต็มใน [`../README.md`](../README.md)):
+ภาพในโฟลเดอร์นี้เป็นหลักฐานเสริม (ไม่ใช่ทุกภาพบังคับส่งตามโจทย์การบ้าน — ดู [`../README.md`](../README.md) สำหรับสิ่งที่บังคับจริง):
 
-1. CRUD/persistence — ก่อน/หลังปิดเบราว์เซอร์
-2. `permission-denied` ตอนไม่ได้ login
-3. เพื่อนเปิด live URL แล้วต้อง login ก่อน
-
-เมื่อวางแล้ว ให้ทำสำเนาไปไว้ที่ [`../../docs/06-module2-homework/`](../../docs/06-module2-homework/) ด้วย เช่นเดียวกับที่การบ้านที่ 1 ทำไว้ (โจทย์เช็คจากโฟลเดอร์ `docs/` ของ repo โดยตรง)
+- `w7-login-redirect.png` — หน้า login ที่ redirect มาให้เมื่อเข้าเว็บแบบไม่ login
+- `w7-permission-denied-console.png` — DevTools Console แสดง `403 (Forbidden)` ตอน fetch ข้อมูลแบบไม่ login
+- `w7-permission-denied-incognito-full.png` — ภาพรวม Incognito + URL bar + Console เห็น error ในภาพเดียว (**ภาพนี้ถูก copy ไปเป็นหลักฐานบังคับที่ [`../../docs/06-module2-homework/w7-permission-denied-incognito.png`](../../docs/06-module2-homework/w7-permission-denied-incognito.png) แล้ว**)
+- `image-*.png` — ภาพทดสอบ RBAC (มุมมอง Perfumer, การ flip role ใน Firebase Console, มุมมอง QC Reviewer)
