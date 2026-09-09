@@ -10,14 +10,14 @@
 
 ## 🔴 Live App
 
-> **URL:** _(รอกรอกหลัง `firebase deploy` — ดูขั้นตอนด้านล่าง)_
+> **URL:** https://sattasarasada-perfume.web.app
 
 ## ต้องส่งอะไร (ภายใน ศุกร์ 11 ก.ย. 2569 ทาง Google Classroom)
 
 ส่ง **URL เดียว** ของ repo `Raise` (https://github.com/sattasarasadaw-crypto/PerfumeRaisework) โดย repo ต้องมีครบ:
 
 - [x] Source code พร้อม `CLAUDE.md` ที่ไม่มี API key/secret หลุด (ดูหัวข้อ "งานส่งย่อยที่มีโค้ดจริง" ใน root `CLAUDE.md`)
-- [ ] `README.md` (ไฟล์นี้) ต้องมี live URL ต่อจากที่ deploy แล้ว
+- [x] `README.md` (ไฟล์นี้) มี live URL แล้ว: https://sattasarasada-perfume.web.app
 - [x] `ACL.md` ที่ root ของ repo — ทำไว้แล้ว ([`../ACL.md`](../ACL.md))
 - [ ] Screenshot หลักฐานใน `docs/` (ดูรายการ checkpoint ด้านล่าง)
 
@@ -26,9 +26,9 @@
 | ขั้น | งาน | สถานะ |
 |---|---|---|
 | A | `CLAUDE.md` อัปเดตครอบคลุม auth/roles/rules แล้ว, `.gitignore` กัน secret เดิมอยู่แล้ว | ✅ |
-| B | CRUD ครบ: Create (`formula-new.html`), Read (`index.html`), Update-status-only (`formula-detail.html`), Delete-with-confirm (`formula-detail.html`) | ✅ เขียนโค้ดแล้ว — ต้องทดสอบจริงในเบราว์เซอร์ |
-| C | Auth (login/signup/logout, redirect ถ้าไม่ login, `perfumerId`=uid), ACL.md, Firestore Security Rules | ✅ เขียนโค้ดแล้ว — ต้องเปิด Email/Password provider ใน Firebase Console ก่อนทดสอบได้ |
-| D | Deploy ขึ้น Firebase Hosting | ⬜ ต้องรันเองในเทอร์มินัล (ดูด้านล่าง) |
+| B | CRUD ครบ: Create (`formula-new.html`), Read (`index.html`), Update-status-only (`formula-detail.html`), Delete-with-confirm (`formula-detail.html`) | ✅ ทดสอบจริงแล้ว (signup→create→submit→persistence-after-reload→delete-cancel ผ่านหมด) — ยังขาดแค่ยืนยัน delete-confirm กด OK จริง |
+| C | Auth (login/signup/logout, redirect ถ้าไม่ login, `perfumerId`=uid), ACL.md, Firestore Security Rules | ✅ ทดสอบจริงแล้ว — role flip เป็น `qc_reviewer` ใช้งานได้, perfumer/QC เห็นข้อมูลตาม scope ที่ถูกต้อง |
+| D | Deploy ขึ้น Firebase Hosting + Firestore Rules | ✅ deploy สำเร็จแล้ว — ยืนยัน `permission-denied` จริงตอนไม่ login และ live URL ใช้งานได้ |
 
 ## สิ่งที่ต้องทำเองก่อนเริ่มทดสอบ
 
@@ -51,9 +51,9 @@ firebase deploy --only hosting,firestore:rules
 
 ## เช็กก่อนส่ง
 
-- [ ] Checkpoint 1: repo มี `CLAUDE.md` ไม่มี API key ที่เป็นความลับหลุด (`firebaseConfig` เป็น client config เปิดเผยได้ ไม่ใช่ secret — ดูคำอธิบายใน `CLAUDE.md`)
-- [ ] Checkpoint 2: screenshot ก่อน/หลังปิดเบราว์เซอร์ พิสูจน์ข้อมูลยังอยู่
-- [ ] Checkpoint 3: screenshot เจอ `permission-denied` ตอนไม่ได้ login
-- [ ] Checkpoint 4: screenshot เพื่อนเปิด live URL แล้วต้อง login ก่อน
+- [x] Checkpoint 1: repo มี `CLAUDE.md` ไม่มี API key ที่เป็นความลับหลุด (`firebaseConfig` เป็น client config เปิดเผยได้ ไม่ใช่ secret — ดูคำอธิบายใน `CLAUDE.md`)
+- [ ] Checkpoint 2: screenshot ก่อน/หลังปิดเบราว์เซอร์ พิสูจน์ข้อมูลยังอยู่ (ยืนยัน mechanism ทำงานถูกต้องแล้วผ่านการทดสอบอัตโนมัติ — เหลือแค่ถ่ายภาพ)
+- [ ] Checkpoint 3: screenshot เจอ `permission-denied` ตอนไม่ได้ login (ยืนยันแล้วว่า error เกิดขึ้นจริงหลัง deploy — เหลือแค่ถ่ายภาพ)
+- [ ] Checkpoint 4: screenshot เพื่อนเปิด live URL แล้วต้อง login ก่อน (URL พร้อมใช้แล้ว: https://sattasarasada-perfume.web.app — เหลือแค่ส่งให้เพื่อนเปิดจริง)
 - [ ] คำตอบ Google Classroom: บทบาทของระบบมีอะไรบ้าง และแต่ละบทบาททำอะไรไม่ได้ (สรุปจาก [`../ACL.md`](../ACL.md) ได้เลย)
 - [ ] ไม่มีข้อมูลจริงของบุคคลอื่นอยู่ในฐานข้อมูลเลย (ข้อมูลสมมติทั้งหมด)

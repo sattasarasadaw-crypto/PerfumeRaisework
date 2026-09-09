@@ -7,7 +7,7 @@
 
 ## 🔴 Live App (Module 2 — การบ้านที่ 2, สัปดาห์ที่ 7)
 
-> **URL:** _(รอกรอกหลัง `firebase deploy` — ดูรายละเอียดที่ [`Submission-RAISE-M2-HW2/README.md`](Submission-RAISE-M2-HW2/README.md))_
+> **URL:** https://sattasarasada-perfume.web.app
 
 โค้ดจริงอยู่ที่ [`Submission-RAISE-M2-HW1/prototype/`](Submission-RAISE-M2-HW1/prototype/) · สิทธิ์การเข้าถึงตามบทบาท: [`ACL.md`](ACL.md)
 

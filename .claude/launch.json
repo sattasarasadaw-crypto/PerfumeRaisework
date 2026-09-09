@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "formula-review-local",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "Submission-RAISE-M2-HW1/prototype/public"],
+      "port": 5500
+    }
+  ]
+}
