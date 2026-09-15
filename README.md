@@ -5,11 +5,11 @@
 
 ---
 
-## 🔴 Live App (Module 2 — การบ้านที่ 2, สัปดาห์ที่ 7)
+## 🔴 Live App (Module 2 — การบ้านที่ 2 สัปดาห์ที่ 7 + การบ้านที่ 3 สัปดาห์ที่ 8)
 
 > **URL:** https://sattasarasada-perfume.web.app
 
-โค้ดจริงอยู่ที่ [`Submission-RAISE-M2-HW1/prototype/`](Submission-RAISE-M2-HW1/prototype/) · สิทธิ์การเข้าถึงตามบทบาท: [`ACL.md`](ACL.md)
+โค้ดจริงอยู่ที่ [`Submission-RAISE-M2-HW1/prototype/`](Submission-RAISE-M2-HW1/prototype/) · สิทธิ์การเข้าถึงตามบทบาท: [`ACL.md`](ACL.md) · ผู้ช่วย AI (สัปดาห์ที่ 8): [`Submission-RAISE-M2-HW3/README.md`](Submission-RAISE-M2-HW3/README.md)
 
 ---
 
