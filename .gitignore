@@ -29,6 +29,11 @@ cookie.txt
 *secret*
 *credential*
 
+# คีย์ AI (OpenRouter) — ห้ามขึ้น GitHub เด็ดขาด (Module 2 การบ้านที่ 3 / สัปดาห์ที่ 8)
+# ⚠️ ไม่รวมไฟล์ *-example.js ที่เป็นแม่แบบไม่มีคีย์จริง (git ignore ไม่ match เพราะชื่อไฟล์ต่างกัน)
+config.local.js
+config.local.json
+
 # dependencies
 node_modules/
 

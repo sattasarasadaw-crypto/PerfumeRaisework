@@ -43,6 +43,7 @@ service cloud.firestore {
 
       // เจ้าของแก้ไข/ส่งตรวจสูตรของตัวเองได้ขณะยังเป็น draft (ห้ามเปลี่ยน perfumerId, สถานะไปได้แค่ draft->submitted)
       // หรือ QC Reviewer เปลี่ยนได้เฉพาะฟิลด์ status ของสูตรที่ submitted แล้ว ไปเป็น approved/rejected เท่านั้น
+      // หรือ QC Reviewer เขียนได้เฉพาะฟิลด์ aiSuggestion ของสูตรที่ submitted แล้ว (AI สรุปให้อ่าน — ห้ามแตะ status ในเคสนี้)
       allow update: if isSignedIn() && (
         (resource.data.perfumerId == request.auth.uid
           && resource.data.status == 'draft'
@@ -53,6 +54,10 @@ service cloud.firestore {
           && resource.data.status == 'submitted'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
           && request.resource.data.status in ['approved', 'rejected'])
+        ||
+        (isQc()
+          && resource.data.status == 'submitted'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['aiSuggestion']))
       );
 
       allow delete: if isSignedIn()
@@ -69,6 +74,19 @@ service cloud.firestore {
                       && get(/databases/$(database)/documents/formulas/$(formulaId)).data.status == 'draft';
 
         // วัตถุดิบคงที่หลังบันทึก — ไม่มี use case แก้ไข/ลบรายตัวใน MVP นี้
+        allow update, delete: if false;
+      }
+
+      // ประวัติการเรียก AI สรุปสูตร (Module 2 การบ้านที่ 3 / สัปดาห์ที่ 8) — เขียนได้เฉพาะ QC ตอนสูตร submitted แล้ว
+      // เป็น log สะสม ไม่มี use case แก้ไข/ลบรายตัว
+      match /aiLog/{logId} {
+        allow read: if isSignedIn()
+                    && (isQc()
+                        || get(/databases/$(database)/documents/formulas/$(formulaId)).data.perfumerId == request.auth.uid);
+
+        allow create: if isQc()
+                      && get(/databases/$(database)/documents/formulas/$(formulaId)).data.status == 'submitted';
+
         allow update, delete: if false;
       }
     }

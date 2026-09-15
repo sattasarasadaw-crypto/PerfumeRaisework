@@ -26,6 +26,12 @@
   .btn-reject { background: #a31c1c; color: #fff; }
   .btn-delete { background: none; color: #a31c1c; border: 1px solid #a31c1c; }
   #error { color: #a31c1c; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+  .ai-btn { margin-top: 14px; background: none; border: 1px dashed #8a6800; color: #8a6800; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+  .ai-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .ai-box { margin-top: 10px; padding: 10px 12px; border-radius: 4px; font-size: 0.85rem; line-height: 1.5; }
+  .ai-box.ok { background: #fff3cd; border: 1px solid #e6c874; color: #6b5100; }
+  .ai-box.err { background: #fddede; border: 1px solid #f0b8b8; color: #a31c1c; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
@@ -40,7 +46,11 @@
   <script type="module">
     import { auth, db } from "./firebase-config.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { doc, getDoc, updateDoc, deleteDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { doc, getDoc, updateDoc, deleteDoc, collection, getDocs, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    function escHtml(s) {
+      return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
 
     const cardEl = document.getElementById("card");
     const errorEl = document.getElementById("error");
@@ -79,6 +89,8 @@
           <div class="label">วัตถุดิบ</div>
           <table><thead><tr><th>ชื่อ</th><th>%</th></tr></thead><tbody>${ingredientsHtml || "<tr><td colspan=2>ไม่มีข้อมูล</td></tr>"}</tbody></table>
         </div>
+        ${canReview ? '<button type="button" class="ai-btn" id="aiSummaryBtn">🤖 ให้ AI สรุปสูตรนี้ให้ QC อ่าน</button>' : ""}
+        <div id="aiSummaryBox" class="ai-box ${f.aiSuggestion ? "ok" : "hidden"}">${f.aiSuggestion ? "🤖 <strong>สรุปโดย AI — ใช้ประกอบการตัดสินใจเท่านั้น:</strong><br>" + escHtml(f.aiSuggestion) : ""}</div>
         <div class="actions">
           ${canSubmit ? '<button class="btn-submit" id="submitBtn">ส่งตรวจ (submit)</button>' : ""}
           ${canReview ? '<button class="btn-approve" id="approveBtn">อนุมัติ (approve)</button>' : ""}
@@ -86,6 +98,75 @@
           ${canDelete ? '<button class="btn-delete" id="deleteBtn">ลบ</button>' : ""}
         </div>
       `;
+
+      document.getElementById("aiSummaryBtn")?.addEventListener("click", async () => {
+        const aiBtn = document.getElementById("aiSummaryBtn");
+        const aiBox = document.getElementById("aiSummaryBox");
+        const aiBtnLabel = aiBtn.textContent;
+
+        aiBtn.disabled = true;
+        aiBtn.textContent = "กำลังให้ AI สรุป...";
+        aiBox.className = "ai-box hidden";
+        aiBox.textContent = "";
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+
+        const inputText =
+          "ชื่อสูตร: " + f.name + "\n" +
+          "ประเภทน้ำหอม: " + f.fragranceTypeName + "\n" +
+          "โจทย์ (brief): " + f.brief + "\n" +
+          "วัตถุดิบ: " + JSON.stringify([...ingSnap.docs].map((d) => d.data()));
+
+        try {
+          const { OPENROUTER_API_KEY } = await import("./config.local.js");
+
+          const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            signal: controller.signal,
+            headers: {
+              "Authorization": "Bearer " + OPENROUTER_API_KEY,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash-lite",
+              messages: [
+                {
+                  role: "system",
+                  content: "คุณช่วยสรุปสูตรน้ำหอมให้ QC Reviewer อ่านก่อนตัดสินใจอนุมัติ/ตีกลับ ตอบเป็นภาษาไทยสั้น ๆ 2-3 ประโยค สรุปองค์ประกอบ/แนวกลิ่นจากวัตถุดิบ และถ้ามีวัตถุดิบที่ควรระวังตาม IFRA ให้ตั้งข้อสังเกตไว้ด้วย ห้ามฟันธงว่าควรอนุมัติหรือตีกลับ ห้ามอ้างตัวเลขขีดจำกัดที่แน่นอนราวกับเป็นผลตรวจทางการ",
+                },
+                { role: "user", content: inputText },
+              ],
+            }),
+          });
+
+          const data = await res.json();
+          if (!res.ok) throw new Error((data.error && data.error.message) || "เรียก API ไม่สำเร็จ");
+
+          const summary = (data.choices[0].message.content || "").trim();
+          if (!summary) throw new Error("AI ไม่ได้ตอบข้อความกลับมา");
+
+          await updateDoc(formulaRef, { aiSuggestion: summary });
+          await addDoc(collection(formulaRef, "aiLog"), {
+            input: inputText,
+            output: summary,
+            createdAt: Timestamp.now(),
+          });
+
+          f.aiSuggestion = summary;
+          aiBox.className = "ai-box ok";
+          aiBox.innerHTML = "🤖 <strong>สรุปโดย AI — ใช้ประกอบการตัดสินใจเท่านั้น:</strong><br>" + escHtml(summary);
+        } catch (err) {
+          aiBox.className = "ai-box err";
+          aiBox.textContent = err.name === "AbortError"
+            ? "⌛ รอ AI นานเกิน 15 วินาที — ยังกดอนุมัติ/ตีกลับได้ตามปกติ"
+            : "❌ ให้ AI สรุปไม่สำเร็จ: " + err.message + " — ยังกดอนุมัติ/ตีกลับได้ตามปกติ";
+        } finally {
+          clearTimeout(timeout);
+          aiBtn.disabled = false;
+          aiBtn.textContent = aiBtnLabel;
+        }
+      });
 
       document.getElementById("submitBtn")?.addEventListener("click", async () => {
         await updateDoc(formulaRef, { status: "submitted" });

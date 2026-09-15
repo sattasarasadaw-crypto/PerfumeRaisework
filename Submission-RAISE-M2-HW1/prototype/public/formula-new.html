@@ -19,6 +19,12 @@
   button[type="submit"] { margin-top: 20px; width: 100%; padding: 10px; background: #8a6800; color: #fff; border: none; border-radius: 4px; font-size: 0.95rem; cursor: pointer; }
   button[type="submit"]:hover { background: #6b5100; }
   #error { color: #a31c1c; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+  .ai-btn { margin-top: 14px; background: none; border: 1px dashed #8a6800; color: #8a6800; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+  .ai-btn:disabled { opacity: .6; cursor: not-allowed; }
+  .ai-box { margin-top: 10px; padding: 10px 12px; border-radius: 4px; font-size: 0.85rem; line-height: 1.5; }
+  .ai-box.ok { background: #fff3cd; border: 1px solid #e6c874; color: #6b5100; }
+  .ai-box.err { background: #fddede; border: 1px solid #f0b8b8; color: #a31c1c; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
@@ -43,6 +49,9 @@
     <div id="ingredients"></div>
     <button type="button" id="addIngBtn">+ เพิ่มวัตถุดิบ</button>
 
+    <button type="button" id="aiIfraBtn" class="ai-btn">🤖 ให้ AI ตรวจ IFRA เบื้องต้น</button>
+    <div id="aiIfraBox" class="ai-box hidden"></div>
+
     <div id="error"></div>
     <button type="submit">บันทึกเป็นร่าง (draft)</button>
   </form>
@@ -55,8 +64,83 @@
     const fragranceTypeEl = document.getElementById("fragranceType");
     const ingredientsEl = document.getElementById("ingredients");
     const errorEl = document.getElementById("error");
+    const aiIfraBtn = document.getElementById("aiIfraBtn");
+    const aiIfraBox = document.getElementById("aiIfraBox");
+    const aiIfraBtnLabel = aiIfraBtn.textContent;
     let currentUser = null;
     let currentDisplayName = "";
+    let aiIfraNoteText = "";
+
+    function escHtml(s) {
+      return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+
+    aiIfraBtn.addEventListener("click", async () => {
+      const brief = document.getElementById("brief").value.trim();
+      const rows = [...ingredientsEl.querySelectorAll(".ing-row")].map((row) => ({
+        materialName: row.querySelector(".ing-name").value.trim(),
+        percent: row.querySelector(".ing-percent").value,
+      })).filter((r) => r.materialName);
+
+      if (!brief || rows.length === 0) {
+        aiIfraBox.className = "ai-box err";
+        aiIfraBox.textContent = "⚠️ กรอกโจทย์ (brief) และวัตถุดิบอย่างน้อย 1 รายการก่อน แล้วค่อยกดให้ AI ตรวจ";
+        return;
+      }
+
+      aiIfraBtn.disabled = true;
+      aiIfraBtn.textContent = "กำลังให้ AI ตรวจ...";
+      aiIfraBox.className = "ai-box hidden";
+      aiIfraBox.textContent = "";
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      try {
+        const { OPENROUTER_API_KEY } = await import("./config.local.js");
+
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Authorization": "Bearer " + OPENROUTER_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-lite",
+            messages: [
+              {
+                role: "system",
+                content: "คุณช่วยนักปรุงน้ำหอมตรวจสอบเบื้องต้นว่ารายการวัตถุดิบที่ให้มามีสารที่มักถูกจำกัดปริมาณตาม IFRA หรือมีความเสี่ยงที่ควรระวังหรือไม่ ตอบเป็นภาษาไทยสั้น ๆ 1-3 ประโยค เป็นข้อสังเกตเชิงคุณภาพเท่านั้น ห้ามอ้างเปอร์เซ็นต์ขีดจำกัดที่แน่นอนราวกับเป็นผลตรวจทางการ และห้ามฟันธงว่าผ่านหรือไม่ผ่าน ให้บอกว่าควรให้ผู้เชี่ยวชาญตรวจสอบต่อเสมอ",
+              },
+              {
+                role: "user",
+                content: "โจทย์ (brief): " + brief + "\nรายการวัตถุดิบ: " + JSON.stringify(rows),
+              },
+            ],
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error((data.error && data.error.message) || "เรียก API ไม่สำเร็จ");
+
+        const note = (data.choices[0].message.content || "").trim();
+        if (!note) throw new Error("AI ไม่ได้ตอบข้อความกลับมา");
+
+        aiIfraNoteText = note;
+        aiIfraBox.className = "ai-box ok";
+        aiIfraBox.innerHTML = "🤖 <strong>ข้อสังเกตเบื้องต้นจาก AI — ไม่ใช่ผลตรวจ IFRA อย่างเป็นทางการ โปรดตรวจสอบก่อนตัดสินใจ:</strong><br>" + escHtml(note);
+      } catch (err) {
+        aiIfraBox.className = "ai-box err";
+        aiIfraBox.textContent = err.name === "AbortError"
+          ? "⌛ รอ AI นานเกิน 15 วินาที — ยังบันทึกสูตรต่อได้ตามปกติ"
+          : "❌ ให้ AI ตรวจไม่สำเร็จ: " + err.message + " — ยังบันทึกสูตรต่อได้ตามปกติ";
+      } finally {
+        clearTimeout(timeout);
+        aiIfraBtn.disabled = false;
+        aiIfraBtn.textContent = aiIfraBtnLabel;
+      }
+    });
 
     function addIngredientRow(materialName = "", percent = "") {
       const row = document.createElement("div");
@@ -116,6 +200,7 @@
           fragranceTypeName: selectedType.dataset.name,
           brief: document.getElementById("brief").value.trim(),
           status: "draft",
+          aiIfraNote: aiIfraNoteText || "",
           createdAt: Timestamp.now(),
         });
         for (const ing of ingredientRows) {
