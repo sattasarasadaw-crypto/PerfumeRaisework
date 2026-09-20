@@ -4,8 +4,22 @@
     {
       "name": "formula-review-local",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "Submission-RAISE-M2-HW1/prototype/public"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5500",
+        "--directory",
+        "Submission-RAISE-M2-HW1/prototype/public"
+      ],
       "port": 5500
+    },
+    {
+      "name": "oneshot-review-local",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "../PerfumeRaisework-oneshot/tests/serve.mjs"
+      ],
+      "port": 4173
     }
   ]
 }

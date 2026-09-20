@@ -23,6 +23,9 @@
 **เอกสารประกอบ:** สเปคฉบับรวม [`spec.md`](spec.md) · ขอบเขตโครงงาน [`SCOPE.md`](SCOPE.md) · สิทธิ์ตามบทบาท [`ACL.md`](ACL.md)
 **โค้ดจริง:** [`Submission-RAISE-M2-HW1/prototype/`](Submission-RAISE-M2-HW1/prototype/) · **บันทึกรายสัปดาห์:** [HW1](Submission-RAISE-M2-HW1/README.md) · [HW2](Submission-RAISE-M2-HW2/README.md) · [HW3](Submission-RAISE-M2-HW3/README.md) · [HW4](Submission-RAISE-M2-HW4/README.md)
 
+**repo คู่ขนาน (ส่วน A ข้อ 3 "สั่งทีเดียวจบ"):** https://github.com/sattasarasadaw-crypto/PerfumeRaisework-oneshot
+ระบบเดียวกันที่ถูกสร้างขึ้นใหม่ทั้งชุดจาก [`spec.md`](spec.md) โดยไม่เปิดดูโค้ดใน repo นี้เลย — ไว้เทียบว่าสเปคชัดพอไหม (งานส่งจริงคือ repo นี้)
+
 ### 🔒 คีย์ AI ไม่หลุด — ตรวจได้
 
 - ไม่เคยมีคีย์ใน git history เลย (`config.local.js` เข้า `.gitignore` ก่อนถูกสร้าง)
