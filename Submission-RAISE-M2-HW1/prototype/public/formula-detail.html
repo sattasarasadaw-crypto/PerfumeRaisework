@@ -119,7 +119,9 @@
           "วัตถุดิบ: " + JSON.stringify([...ingSnap.docs].map((d) => d.data()));
 
         try {
-          const { OPENROUTER_API_KEY } = await import("./config.local.js");
+          const { getOpenRouterKey, forgetOpenRouterKey } = await import("./ai-key.js");
+          const OPENROUTER_API_KEY = await getOpenRouterKey();
+          if (!OPENROUTER_API_KEY) throw new Error("ยังไม่ได้ใส่คีย์ AI — กดปุ่มอีกครั้งแล้ววางคีย์เพื่อใช้ฟีเจอร์นี้");
 
           const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
@@ -141,6 +143,8 @@
           });
 
           const data = await res.json();
+          // คีย์ผิด/หมดอายุ — ลืมคีย์ที่เก็บไว้ในแท็บนี้ เพื่อให้ถามใหม่ในครั้งถัดไป
+          if (res.status === 401 || res.status === 403) forgetOpenRouterKey();
           if (!res.ok) throw new Error((data.error && data.error.message) || "เรียก API ไม่สำเร็จ");
 
           const summary = (data.choices[0].message.content || "").trim();

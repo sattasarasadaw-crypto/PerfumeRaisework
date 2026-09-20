@@ -1,7 +1,13 @@
 {
   "hosting": {
     "public": "public",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "config.local.js",
+      "config.local.example.js"
+    ]
   },
   "firestore": {
     "rules": "firestore.rules"

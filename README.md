@@ -5,11 +5,29 @@
 
 ---
 
-## 🔴 Live App (Module 2 — การบ้านที่ 2 สัปดาห์ที่ 7 + การบ้านที่ 3 สัปดาห์ที่ 8)
+## 🔴 ระบบที่ใช้งานได้จริง + รายงานผลการทดสอบ
 
-> **URL:** https://sattasarasada-perfume.web.app
+> ### 🌐 URL ระบบ: **https://sattasarasada-perfume.web.app**
+> ### 📊 รายงานผลการทดสอบ: **[`test-results.md`](test-results.md)**
 
-โค้ดจริงอยู่ที่ [`Submission-RAISE-M2-HW1/prototype/`](Submission-RAISE-M2-HW1/prototype/) · สิทธิ์การเข้าถึงตามบทบาท: [`ACL.md`](ACL.md) · ผู้ช่วย AI (สัปดาห์ที่ 8): [`Submission-RAISE-M2-HW3/README.md`](Submission-RAISE-M2-HW3/README.md)
+**ของส่งมอบ 5 รายการของ [การบ้านที่ 4 (Module 2 สัปดาห์ที่ 9)](https://cnacha-mfu.github.io/raise2-module2/materials/week9/w9-homework.html)**
+
+| # | ของส่งมอบ | อยู่ที่ |
+|---|---|---|
+| 1 | 🌐 URL ระบบที่เปิดใช้งานได้จริง | https://sattasarasada-perfume.web.app |
+| 2 | 🤖 ไฟล์ตั้งค่าผู้ช่วย 3 ตัว (ระบุโมเดลต่างกันตามงาน) | [`.claude/agents/`](.claude/agents/) — `formula-ui-builder` (haiku) · `formula-data-rules` (opus) · `formula-ai-feature` (sonnet) · `formula-tester` (sonnet) |
+| 3 | 🧪 ชุดทดสอบ รวมเทสต์ความปลอดภัย | [`Submission-RAISE-M2-HW1/prototype/tests/`](Submission-RAISE-M2-HW1/prototype/tests/) |
+| 4 | 📊 รายงานผลการทดสอบ | [`test-results.md`](test-results.md) |
+| 5 | 📝 สิ่งที่ยังไม่เสร็จ ส่งต่อ Module 3 | [`BACKLOG.md`](BACKLOG.md) |
+
+**เอกสารประกอบ:** สเปคฉบับรวม [`spec.md`](spec.md) · ขอบเขตโครงงาน [`SCOPE.md`](SCOPE.md) · สิทธิ์ตามบทบาท [`ACL.md`](ACL.md)
+**โค้ดจริง:** [`Submission-RAISE-M2-HW1/prototype/`](Submission-RAISE-M2-HW1/prototype/) · **บันทึกรายสัปดาห์:** [HW1](Submission-RAISE-M2-HW1/README.md) · [HW2](Submission-RAISE-M2-HW2/README.md) · [HW3](Submission-RAISE-M2-HW3/README.md) · [HW4](Submission-RAISE-M2-HW4/README.md)
+
+### 🔒 คีย์ AI ไม่หลุด — ตรวจได้
+
+- ไม่เคยมีคีย์ใน git history เลย (`config.local.js` เข้า `.gitignore` ก่อนถูกสร้าง)
+- ตั้งแต่ 20 ก.ย. 2569 คีย์ไม่ถูก deploy ขึ้นเว็บด้วย — `firebase.json` กันไว้อีกชั้น
+- มีเทสต์อัตโนมัติ T6 คอยยิงเช็กเว็บจริงว่าไม่มีคีย์หลุด รันทุกครั้งที่ `npm test`
 
 ---
 

@@ -34,6 +34,16 @@ cookie.txt
 config.local.js
 config.local.json
 
+# บัญชีทดสอบของชุดเทสต์ Playwright (Module 2 การบ้านที่ 4 / สัปดาห์ที่ 9)
+# ⚠️ ไม่รวม test-accounts.example.json ที่เป็นแม่แบบไม่มีรหัสผ่านจริง
+test-accounts.local.json
+
+# ผลการรันเทสต์ (สร้างใหม่ได้ด้วย npm test — รายงานสรุปอยู่ที่ test-results.md ที่ root)
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
 # dependencies
 node_modules/
 
