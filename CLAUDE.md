@@ -24,8 +24,8 @@ repo นี้คือพื้นที่งานส่งวิชา **RAI
 | คาบ | วัน | เนื้อหา / Lab |
 |---|---|---|
 | 1 | ส. 26 ก.ย. บ่าย | Vibe Coding (Prompt → Run → **Verify** → Refine) · Lab 1.1 ตั้งโปรเจกต์ · Lab 1.2 Dashboard: KPI 4 ใบ + กราฟเส้นรายวัน + กราฟแท่งสาขาเรียงมาก→น้อย, ตรวจกับ Pivot Table, push GitHub · การบ้าน: กราฟจำนวนบิลตามชั่วโมง แยกสาขา + ข้อสังเกต ≥3 ข้อ |
-| 2 | อา. 27 ก.ย. เช้า | คำถาม → ตัวชี้วัด → กราฟ, ประเภทข้อมูล, mean vs median · Lab 2.1 data profiling + cleaning `sales_raw` ด้วย pandas ใน Colab → `sales_clean.csv` + README บันทึกการตัดสินใจ · Lab 2.2 ซ่อมกราฟแย่ 5 แบบ · Quiz |
-| 3 | อา. 27 ก.ย. บ่าย | Lab 3.1 Firebase project + seed script (`firebase-admin`, 3 เดือนล่าสุด, batch ≤500, doc id = `order_id-product_id`) · Lab 3.2 Dashboard real-time (`onSnapshot`, filter วันที่/สาขา, ฟอร์มบันทึกยอดขาย) · Lab 3.3 Google login + Security Rules + deploy (Firebase Hosting หรือ Vercel) · การบ้าน: เสนอหัวข้อโปรเจกต์ 1 ย่อหน้า ส่งก่อน ส. 3 ต.ค. |
+| 2 | ~~อา. 27 ก.ย. เช้า~~ **เลื่อน** (อาจารย์แจ้ง 26 ก.ย., วันใหม่ยังไม่ทราบ) | คำถาม → ตัวชี้วัด → กราฟ, ประเภทข้อมูล, mean vs median · Lab 2.1 data profiling + cleaning `sales_raw` ด้วย pandas ใน Colab → `sales_clean.csv` + README บันทึกการตัดสินใจ · Lab 2.2 ซ่อมกราฟแย่ 5 แบบ · Quiz |
+| 3 | ~~อา. 27 ก.ย. บ่าย~~ **เลื่อน** (วันใหม่ยังไม่ทราบ) | Lab 3.1 Firebase project + seed script (`firebase-admin`, 3 เดือนล่าสุด, batch ≤500, doc id = `order_id-product_id`) · Lab 3.2 Dashboard real-time (`onSnapshot`, filter วันที่/สาขา, ฟอร์มบันทึกยอดขาย) · Lab 3.3 Google login + Security Rules + deploy (Firebase Hosting หรือ Vercel) · การบ้าน: เสนอหัวข้อโปรเจกต์ 1 ย่อหน้า ส่งก่อน ส. 3 ต.ค. |
 | ต่อไป | 3 ต.ค. – 25 ต.ค. | Day 3–4 RFM/Cohort/Pareto/drill-down/แผนที่/forecast/anomaly · Day 5–6 AI สรุปผล/รีวิวภาษาไทย/แชตถามข้อมูล · Day 7 โปรเจกต์ทีม Demo Day · คาบ 7 สอน `daily_summary` |
 
 Stack ของคอร์ส: React 19 + Vite 7 + Tailwind CSS 4 (`@tailwindcss/vite`) + Recharts 3 + PapaParse, Node ≥ 20, Firebase (Firestore/Auth/Hosting) — ต่างจาก Module 2 ที่เป็น HTML ล้วนไม่มี build
@@ -67,13 +67,13 @@ repo นี้จะถูก push ขึ้น GitHub **ห้ามนำเ�
 Module 3/            ← งานปัจจุบัน (git repo แยก ไม่อยู่ใน repo Raise)
   ref/               วัสดุคอร์สต้นฉบับ (read-only, gitignored)
   baanbrew-dashboard/  Lab 1 — React + Vite + Tailwind v4 + Recharts + PapaParse (`npm run dev`; ตรรกะคำนวณใน src/lib/metrics.js)
-Module2/             งาน Module 2 ทั้งหมด ถูกย้ายมารวมที่นี่ (ยังไม่ได้ commit การย้าย — git เห็นเป็น D ที่ path เก่า + ?? Module2/)
+Module2/             งาน Module 2 ทั้งหมด ถูกย้ายมารวมที่นี่ (commit การย้ายแล้ว 26 ก.ย. — ยังไม่ push)
   docs/              SDLC vault เดิม (01-requirements … 06-module2-homework) — Obsidian + [[wikilink]]
   reference/         เอกสารต้นทางเชิงลึก (gitignored, read-only)
   Submission-RAISE-M2-HW1..4/   การบ้าน M2 (HW1/prototype = แอป Formula Review บน Firebase `sattasarasada-perfume`)
   tools/build-submission.py
 ACL.md SCOPE.md spec.md BACKLOG.md test-results.md README.md   ของส่ง Module 2 ที่ root (README ยังชี้ path เก่าก่อนย้าย)
-.claude/             agents + skills (ส่วนใหญ่เขียนสำหรับ Module 2 — ดูด้านล่าง), launch.json (ยังชี้ path เก่า `Submission-RAISE-M2-HW1/...`)
+.claude/             agents + skills (ส่วนใหญ่เขียนสำหรับ Module 2 — ดูด้านล่าง), launch.json (`baanbrew-dashboard` ใช้ได้; `formula-review-local` ยังชี้ path เก่า `Submission-RAISE-M2-HW1/...`)
 ```
 
 ## Module 2 (เสร็จแล้ว — อ้างอิงเท่านั้น)
