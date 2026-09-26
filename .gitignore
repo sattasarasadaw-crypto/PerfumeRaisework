@@ -58,5 +58,8 @@ desktop.ini
 __pycache__/
 *.pyc
 
+# Module 3 เป็น git repo แยกของตัวเอง (Module 3/.git) — repo นี้ไม่เก็บซ้ำ
+Module 3/
+
 # ชุดไฟล์ส่งงาน (สร้างด้วย tools/build-submission.py) — ไม่ต้อง commit
 Submission-RAISE-W3/

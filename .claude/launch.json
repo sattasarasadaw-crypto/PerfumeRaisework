@@ -20,6 +20,12 @@
         "../PerfumeRaisework-oneshot/tests/serve.mjs"
       ],
       "port": 4173
+    },
+    {
+      "name": "baanbrew-dashboard",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["Module 3/baanbrew-dashboard/node_modules/vite/bin/vite.js", "Module 3/baanbrew-dashboard", "--port", "5173", "--strictPort"],
+      "port": 5173
     }
   ]
 }
