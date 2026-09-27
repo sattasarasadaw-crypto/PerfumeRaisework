@@ -6,7 +6,7 @@
 
 repo นี้คือพื้นที่งานส่งวิชา **RAISE** ตอนนี้งานหลักคือ **Module 3 — Basic Data Analytics & Data Visualization using AI Vibe Coding**
 งานใหม่ทั้งหมดของ Module 3 ให้อยู่ใต้ `Module 3/` (ชื่อโฟลเดอร์มีช่องว่าง — ใส่เครื่องหมายคำพูดครอบ path ทุกครั้ง)
-**`Module 3/` เป็น git repo แยกของตัวเอง** (`Module 3/.git`, branch `main`) — repo `Raise` กัน `Module 3/` ไว้ใน `.gitignore` จึงไม่เก็บซ้ำ: commit งาน Module 3 จากในโฟลเดอร์ `Module 3/` เท่านั้น; `Module 3/.gitignore` กัน `ref/`, `*.csv`/`*.xlsx` และ Firebase service account key ไว้แล้ว
+**`Module 3/` เป็น git repo แยกของตัวเอง** (`Module 3/.git`, branch `main`) — repo `Raise` กัน `Module 3/` ไว้ใน `.gitignore` จึงไม่เก็บซ้ำ: commit งาน Module 3 จากในโฟลเดอร์ `Module 3/` เท่านั้น; remote = https://github.com/sattasarasadaw-crypto/baanbrew · `Module 3/.gitignore` กันเฉพาะ `ref/` (สไลด์/เฉลย/ชุด Lab ต้นฉบับ), `node_modules/`, `dist/` และ Firebase service account key — ไฟล์ข้อมูล `.csv` นอก `ref/` ขึ้น GitHub ได้ (ผู้ใช้สั่ง 27 ก.ย.; `.gitattributes` `*.csv -text` เก็บตามไบต์เดิม)
 **อย่าแตะ `Module2/`** ถ้าผู้ใช้ไม่ได้สั่ง (ดูหัวข้อ Module 2 ด้านล่าง)
 
 ### เนื้อหาคอร์ส (จาก `Module 3/ref/`)
